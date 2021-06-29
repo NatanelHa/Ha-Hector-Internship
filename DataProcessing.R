@@ -29,5 +29,7 @@ fluxes_long %>%
   filter(!is.na(value))->
   fluxes_long
 
-
-
+#Merge the two tables
+fluxes_long %>%
+  left_join(collar_map_long, by="Collar")->
+  fluxes_merged
