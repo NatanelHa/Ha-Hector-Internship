@@ -41,5 +41,18 @@ fluxes_merged %>%
   ggplot(aes(x = Treatment, y = value))+
   geom_boxplot()+
   geom_jitter(alpha = 0.4, aes(color = Date))+
-  theme_classic()
+  theme_minimal()
 
+#Line Graph with error bars
+fluxes_merged %>%
+  group_by(Treatment, Date) %>%
+  summarise(mean = mean(value), Std_dev = sd(value)) %>%
+  ggplot(aes(x = Date, y = mean, color = Treatment, group = Treatment))+
+  facet_wrap(~Treatment)+
+  geom_line()+ 
+  geom_errorbar(aes(ymax = mean + Std_dev, 
+                     ymin = mean - Std_dev), 
+                 width = 0.2)+
+  theme_grey()
+
+                 
