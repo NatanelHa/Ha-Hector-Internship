@@ -9,12 +9,12 @@ fluxes <- readr::read_csv("fluxes.csv")
 
 #Clean up collar_map
 collar_map %>%
-  select(-LI8100A_Port)->
+  select(Treatment, Collar)->
   collar_map
 
 #Wide to Long Data
 fluxes %>%
-  pivot_longer(-Collar, names_to="Year") ->
+  pivot_longer(-Collar, names_to="Date") ->
   fluxes_long
 
 #Filter Out NA values
@@ -35,4 +35,11 @@ fluxes_merged %>%
 
 summary_treatment %>%
   print()
+
+#Boxplot with overlaid dots
+fluxes_merged %>%
+  ggplot(aes(x = Treatment, y = value))+
+  geom_boxplot()+
+  geom_jitter(alpha = 0.4, aes(color = Date))+
+  theme_classic()
 
