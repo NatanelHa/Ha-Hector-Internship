@@ -55,4 +55,9 @@ fluxes_merged %>%
                  width = 0.2)+
   theme_grey()
 
+#Finding out which collars do not appear in fluxes
+fluxes_long %>%
+  anti_join(collar_map, by="Collar")
+
+print("There are no collars listed in the metadata that do not appear in the data file")  
                  
