@@ -17,7 +17,17 @@ collar_map %>%
   collar_map_long
 
 fluxes %>%
-  pivot_longer(-Collar, names_to="Year")->
+  pivot_longer(-Collar, names_to="Year") ->
   fluxes_long
+
+#Filter Out NA values
+collar_map_long %>%
+  filter(!is.na(value))->
+  collar_map_long
+
+fluxes_long %>%
+  filter(!is.na(value))->
+  fluxes_long
+
 
 
