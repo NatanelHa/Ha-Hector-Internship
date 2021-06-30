@@ -10,7 +10,7 @@ fluxes <- readr::read_csv("fluxes.csv")
 #Clean up collar_map
 collar_map %>%
   select(Treatment, Collar)->
-  collar_map
+  treatment 
 
 #Wide to Long Data
 fluxes %>%
@@ -24,7 +24,7 @@ fluxes_long %>%
 
 #Merge the two tables
 fluxes_long %>%
-  left_join(collar_map, by="Collar")->
+  left_join(treatment, by="Collar")->
   fluxes_merged
 
 #Compute and Print Summary
@@ -48,7 +48,6 @@ fluxes_merged %>%
   group_by(Treatment, Date) %>%
   summarise(mean = mean(value), Std_dev = sd(value)) %>%
   ggplot(aes(x = Date, y = mean, color = Treatment, group = Treatment))+
-  facet_wrap(~Treatment)+
   geom_line()+ 
   geom_errorbar(aes(ymax = mean + Std_dev, 
                      ymin = mean - Std_dev), 
@@ -56,8 +55,10 @@ fluxes_merged %>%
   theme_grey()
 
 #Finding out which collars do not appear in fluxes
-fluxes_long %>%
-  anti_join(collar_map, by="Collar")
+collar_map %>%
+  anti_join(fluxes_long, by="Collar")
 
-print("There are no collars listed in the metadata that do not appear in the data file")  
+#Printing which collars do not appear in fluxes
+print("Collar 34 is listed in the metadata that do not appear in the fluxes data file.")
+print("Collar 34 is in the Fresh Plot, in Group 9, and the treatment was Disturbance")  
                  
