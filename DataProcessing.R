@@ -42,10 +42,11 @@ fluxes_merged %>%
   geom_line()+ 
   geom_errorbar(aes(ymax = mean + Std_dev, 
                     ymin = mean - Std_dev), 
-                    width = 0.2)+
+                    width = 0.2, 
+                    alpha = 0.4)+
   ggtitle("Soil-to-atmosphere CO2 flux Line Graph with Error bars")+
   ylab("Mean Soil-to-atmosphere CO2 flux (units?)")+
-  theme_grey()
+  theme_minimal()
 
 #Finding out which collars do not appear in fluxes and printing 
 collar_map %>%
