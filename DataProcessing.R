@@ -31,7 +31,7 @@ fluxes_merged %>%
   geom_boxplot()+
   geom_jitter(alpha = 0.4, aes(color = Date))+
   ggtitle("Soil-to-atmosphere CO2 flux Boxplot by treatment")+
-  ylab("Soil-to-atmosphere CO2 flux (units?)")+
+  ylab("Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
   theme_minimal()
 
 #Line Graph with error bars
@@ -44,8 +44,8 @@ fluxes_merged %>%
                     ymin = mean - Std_dev), 
                     width = 0.2, 
                     alpha = 0.4)+
-  ggtitle("Soil-to-atmosphere CO2 flux Line Graph with Error bars")+
-  ylab("Mean Soil-to-atmosphere CO2 flux (units?)")+
+  ggtitle("Soil-to-atmosphere CO2 Flux Line Graph with Error bars")+
+  ylab("Mean Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
   theme_minimal()
 
 #Finding out which collars do not appear in fluxes and printing 

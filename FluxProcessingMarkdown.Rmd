@@ -1,0 +1,6 @@
+---
+title: "Soil-to-atmosphere C02 Flux Data Processing Assignmnet"
+author: "Natanel Ha"
+date: "7/1/2021"
+output: html_document
+---
