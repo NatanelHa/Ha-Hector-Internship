@@ -12,29 +12,22 @@ library(dplyr)
 library(ggplot2)
 ```
 
-### Reading Datasets
+### Reading CSV Files 
 ```{r reading, message=FALSE, warning=FALSE}
 collar_map <- readr::read_csv("collar_map.csv")
 fluxes <- readr::read_csv("fluxes.csv")
 ```
 
-### Select treatment and collar from collar_map 
-```{r select, message=FALSE, warning=FALSE}
-collar_map %>%
-  select(Treatment, Collar)->
-  treatment 
-```
-
-### Creating a long data table from fluxes and collar_map
+### Creating a Long Data Table from fluxes and collar_map
 ```{r merge, message=FALSE, warning=FALSE}
 fluxes %>%
   pivot_longer(-Collar, names_to="Date") %>% #Wide to Long
   filter(!is.na(value))%>%                   #Filter out NA
-  left_join(treatment, by="Collar")->        #Merging 
+  left_join(collar_map, by="Collar")->        #Merging 
   fluxes_merged
 ```
 
-### Compute and Print Summary
+### Computing Summary of Fluxes by Treatment
 ```{r summary}
 fluxes_merged %>%
   group_by(Treatment) %>%
@@ -42,7 +35,7 @@ fluxes_merged %>%
   print()
 ```
 
-### Boxplot with overlaid dots
+### Boxplot with Overlaid Dots
 ```{r boxplot}
 fluxes_merged %>%
   ggplot(aes(x = Treatment, y = value))+
@@ -53,7 +46,7 @@ fluxes_merged %>%
   theme_minimal()
 ```
 
-### Line Graph with error bars
+### Line Graph with Error Bars
 ```{r linegraph, message=FALSE, warning=FALSE}
 fluxes_merged %>%
   group_by(Treatment, Date) %>%
@@ -70,7 +63,7 @@ fluxes_merged %>%
 ```
 
 
-### Finding out which collars do not appear in fluxes and printing 
+### Finding Out which Collars do not Appear in fluxes
 ```{r antijoin}
 collar_map %>%
   anti_join(fluxes, by="Collar")

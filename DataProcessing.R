@@ -7,16 +7,11 @@ library(ggplot2)
 collar_map <- readr::read_csv("collar_map.csv")
 fluxes <- readr::read_csv("fluxes.csv")
 
-#Select treatment and collar from collar_map
-collar_map %>%
-  select(Treatment, Collar)->
-  treatment 
-
 #Creating a long data table from fluxes and collar_map
 fluxes %>%
   pivot_longer(-Collar, names_to="Date") %>% #Wide to Long
   filter(!is.na(value))%>%                   #Filter out NA
-  left_join(treatment, by="Collar")->        #Merging 
+  left_join(collar_map, by="Collar")->        #Merging 
   fluxes_merged
 
 #Compute and Print Summary
