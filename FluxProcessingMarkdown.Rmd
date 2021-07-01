@@ -10,6 +10,7 @@ output: html_document
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(kableExtra)
 ```
 
 ### Reading CSV Files 
@@ -32,7 +33,9 @@ fluxes %>%
 fluxes_merged %>%
   group_by(Treatment) %>%
   summarise(mean = mean(value), N = n(), Std_dev = sd(value))%>% 
-  print()
+  kbl(digits = 3) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, 
+                position = "left")
 ```
 
 ### Boxplot with Overlaid Dots
@@ -66,7 +69,10 @@ fluxes_merged %>%
 ### Finding Out which Collars do not Appear in fluxes
 ```{r antijoin}
 collar_map %>%
-  anti_join(fluxes, by="Collar")
+  anti_join(fluxes, by="Collar")%>% 
+  kbl %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, 
+                position = "left")
 ```
 
 ```{r print, echo=FALSE}
