@@ -67,6 +67,8 @@ fluxes_merged %>%
 
 
 ### Finding Out which Collars do not Appear in fluxes
+Using anti_join, we can find out if any collars in the
+metadata do not appear in the fluxes file. 
 ```{r antijoin}
 collar_map %>%
   anti_join(fluxes, by="Collar")%>% 
@@ -74,11 +76,7 @@ collar_map %>%
   kable_styling(bootstrap_options = "striped", full_width = F, 
                 position = "left")
 ```
-
-```{r print, echo=FALSE}
-print("Collar 34 is listed in the metadata that do not appear in the fluxes data file.")
-print("Collar 34 is in the Fresh Plot, in Group 9, and the treatment was Disturbance")  
-```   
+It appears that Collar 34 does not appear in the fluxes file. 
 
 Session Info: 
 ```{r sessionInfo, echo=FALSE}
