@@ -29,6 +29,26 @@ fluxes_merged %>%
   ylab("Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
   theme_minimal()
 
+#Boxplot Without Outliers
+#Marking Which are Outliers
+fluxes_merged %>% 
+  group_by(Treatment) %>%
+  summarise(median = median(value), IQR = IQR(value)) %>%
+  right_join(fluxes_merged, by="Treatment") %>%
+  mutate(not.outlier = as.numeric(abs(value-median)<1.5*IQR)) -> 
+  filtered_fluxes
+
+#Plotting Boxplot
+filtered_fluxes %>%
+  ggplot(aes(x = Treatment, y = value))+
+  geom_boxplot(outlier.shape = NA)+
+  geom_jitter(aes(color = Date, alpha = not.outlier))+
+  scale_alpha_continuous(range = c(0, 1), guide = FALSE)+
+  ylim(c(0,18))+
+  ggtitle("Soil-to-atmosphere CO2 flux Boxplot by treatment")+
+  ylab("Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
+  theme_minimal()
+
 #Line Graph with error bars
 fluxes_merged %>%
   group_by(Treatment, Date) %>%
