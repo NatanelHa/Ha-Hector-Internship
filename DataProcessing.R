@@ -11,7 +11,7 @@ fluxes <- readr::read_csv("fluxes.csv")
 fluxes %>%
   pivot_longer(-Collar, names_to="Date") %>% #Wide to Long
   filter(!is.na(value))%>%                   #Filter out NA
-  left_join(collar_map, by="Collar")->        #Merging 
+  left_join(collar_map, by="Collar")->       #Merging 
   fluxes_merged
 
 #Compute and Print Summary
@@ -43,9 +43,9 @@ filtered_fluxes %>%
   ggplot(aes(x = Treatment, y = value))+
   geom_boxplot(outlier.shape = NA)+
   geom_jitter(aes(color = Date, alpha = not.outlier))+
-  scale_alpha_continuous(range = c(0, 1), guide = FALSE)+
+  scale_alpha_continuous(range = c(0, 1), guide = "none")+
   ylim(c(0,18))+
-  ggtitle("Soil-to-atmosphere CO2 flux Boxplot by treatment")+
+  ggtitle("Soil-to-atmosphere CO2 flux Boxplot by treatment without Outliers")+
   ylab("Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
   theme_minimal()
 
@@ -60,6 +60,31 @@ fluxes_merged %>%
                     width = 0.2, 
                     alpha = 0.4)+
   ggtitle("Soil-to-atmosphere CO2 Flux Line Graph with Error bars")+
+  ylab("Mean Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
+  theme_minimal()
+
+#Line Graph without error bars
+fluxes_merged %>%
+  group_by(Treatment, Date) %>%
+  summarise(mean = mean(value), Std_dev = sd(value)) %>%
+  ggplot(aes(x = Date, y = mean, color = Treatment, group = Treatment))+
+  geom_line()+ 
+  ggtitle("Soil-to-atmosphere CO2 Flux Line Graph without Error bars")+
+  ylab("Mean Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
+  theme_minimal()
+
+#Line Graph Faceted 
+fluxes_merged %>%
+  group_by(Treatment, Date) %>%
+  summarise(mean = mean(value), Std_dev = sd(value)) %>%
+  ggplot(aes(x = Date, y = mean, group = Treatment))+
+  geom_line()+
+  facet_wrap(~Treatment)+
+  geom_errorbar(aes(ymax = mean + Std_dev, 
+                    ymin = mean - Std_dev), 
+                width = 0.2, 
+                alpha = 0.4)+
+  ggtitle("Soil-to-atmosphere CO2 Flux Line Graph Faceted")+
   ylab("Mean Soil-to-atmosphere CO2 Flux (µmol/m2/s)")+
   theme_minimal()
 
