@@ -21,7 +21,11 @@ head(results)
 ggplot(results) +
   aes(x = year, y = value) +
   geom_line() +
-  facet_wrap(~variable, scales = "free_y")
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration",
+                                          "Ftot" = "Total Radiative Forcing",
+                                          "FCO2" = "CO2 Forcing",
+                                          "Tgav" = "Global Mean Temperature")))
 
 ##Setting Parameters
 #Getting Beta value
@@ -54,7 +58,11 @@ compare_results <- rbind(results, results_40)
 ggplot(compare_results) +
   aes(x = year, y = value, color = factor(beta)) +
   geom_line() +
-  facet_wrap(~variable, scales = "free_y") +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration",
+                                              "Ftot" = "Total Radiative Forcing",
+                                              "FCO2" = "CO2 Forcing",
+                                              "Tgav" = "Global Mean Temperature"))) +
   guides(color = guide_legend(title = expression(beta)))
 
 ##Sensitivity analysis 
@@ -82,7 +90,11 @@ sensitivity_beta <- run_with_param_range(core, BETA(), seq(0, 1, 0.05))
 ggplot(sensitivity_beta) +
   aes(x = year, y = value, color = parameter_value, group = parameter_value) +
   geom_line() +
-  facet_wrap(~variable, scales = "free_y") +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration",
+                                              "Ftot" = "Total Radiative Forcing",
+                                              "FCO2" = "CO2 Forcing",
+                                              "Tgav" = "Global Mean Temperature"))) +
   guides(color = guide_colorbar(title = expression(beta))) +
   scale_color_viridis_c() 
 
