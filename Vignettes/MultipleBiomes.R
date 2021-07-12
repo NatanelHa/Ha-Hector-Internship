@@ -26,7 +26,13 @@ plot_data$variable <- factor(plot_data$variable, result_vars)
 ggplot(plot_data) +
   aes(x = year, y =value, color = scenario) +
   geom_line()+
-  facet_wrap(vars(variable), scales = "free_y")+
+  facet_wrap(vars(variable), scales = "free_y",
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
+                                              "Ftot" = "Total Radiative Forcing (W/m2)",
+                                              "Tgav" = "Global Mean Temperature (degrees C)",
+                                              "veg_c" = "Vegetation Carbon (Pg C)",
+                                              "soil_c" = "Soil Carbon (Pg C)",
+                                              "detritus_c" = "Detritus Carbon (Pg C)")))+
   theme_bw()
 
 #Examining the biome specific pools
@@ -47,7 +53,10 @@ warming_details$variable <- vapply(variable_split, "[[", character(1), 2)
 ggplot(warming_details)+
   aes(x = year, y=value, color=biome)+
   geom_line()+
-  facet_wrap(vars(variable), scales = "free_y")+
+  facet_wrap(vars(variable), scales = "free_y",
+             labeller = labeller(variable = c("veg_c" = "Vegetation Carbon (Pg C)",
+                                              "soil_c" = "Soil Carbon (Pg C)",
+                                              "detritus_c" = "Detritus Carbon (Pg C)")))+
   theme_bw()
 
 #C3 and C4 Plants
@@ -82,9 +91,17 @@ plot_data$variable <- factor(plot_data$variable, result_vars)
 ggplot(plot_data)+
   aes(x = year, y = value, linetype = scenario, color = biome)+
   geom_line()+
-  facet_wrap(vars(variable), scales = "free_y")+
+  facet_wrap(vars(variable), scales = "free_y",
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
+                                              "Ftot" = "Total Radiative Forcing (W/m2)",
+                                              "Tgav" = "Global Mean Temperature (degrees C)",
+                                              "veg_c" = "Vegetation Carbon (Pg C)",
+                                              "soil_c" = "Soil Carbon (Pg C)",
+                                              "detritus_c" = "Detritus Carbon (Pg C)")))+
   theme_bw()
 
+#Shutting down
+shutdown(core)
 
   
 
