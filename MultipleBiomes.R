@@ -50,6 +50,42 @@ ggplot(warming_details)+
   facet_wrap(vars(variable), scales = "free_y")+
   theme_bw()
 
+#C3 and C4 Plants
+#Creating newcore
+core <- newcore(rcp45, suppresslogging = TRUE)
 
+#Splitting into biomes
+split_biome(core, "global", c("C3", "C4"),
+            fveg_c = c(0.9, 0.1),
+            beta = c(0.36, 0.18))
+
+#Running and storing results
+invisible(run(core, 2100))
+c4_results <- fetchvars(core, 2000:2100, result_vars, scenario = "c3 vs c4")
+c4_results_biome <- fetchvars(core, 2000:2100,
+                              c(VEG_C("C3"), VEG_C("C4"),
+                                DETRITUS_C("C3"), DETRITUS_C("C4"),
+                                SOIL_C("C3"), SOIL_C("C4")),
+                              scenario = "c3 vs c4")
+
+#Splitting variable based on C3 vs C4
+variable_split <- strsplit(c4_results_biome$variable, ".", fixed = TRUE)
+c4_results_biome$biome <- vapply(variable_split, "[[",character(1),1)
+c4_results_biome$variable <- vapply(variable_split, "[[", character(1), 2)
+
+c4_results$biome <- "global"
+reference_results$biome <- "global"
+
+#Plotting data
+plot_data <- rbind(reference_results, c4_results, c4_results_biome)
+plot_data$variable <- factor(plot_data$variable, result_vars)
+ggplot(plot_data)+
+  aes(x = year, y = value, linetype = scenario, color = biome)+
+  geom_line()+
+  facet_wrap(vars(variable), scales = "free_y")+
+  theme_bw()
+
+
+  
 
 
