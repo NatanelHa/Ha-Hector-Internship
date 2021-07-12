@@ -48,3 +48,6 @@ ggplot(compare_results) +
   geom_line() +
   facet_wrap(~variable, scales = "free_y") +
   guides(color = guide_legend(title = expression(beta)))
+
+
+
