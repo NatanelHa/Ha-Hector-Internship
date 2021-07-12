@@ -1,6 +1,7 @@
 #Importing Libraries
 library(hector)
 library(ggplot2)
+library(latex2exp)
 
 ## Basic Run
 #Configuring INI File
@@ -22,10 +23,11 @@ ggplot(results) +
   aes(x = year, y = value) +
   geom_line() +
   facet_wrap(~variable, scales = "free_y", 
-             labeller = labeller(variable = c("Ca" = "CO2 Concentration",
-                                          "Ftot" = "Total Radiative Forcing",
-                                          "FCO2" = "CO2 Forcing",
-                                          "Tgav" = "Global Mean Temperature")))
+             labeller = labeller(variable = c("Ca" = TeX('(CO2 Concentration (ppmv CO@))'),
+                                          "Ftot" = "Total Radiative Forcing (W/m2)",
+                                          "FCO2" = "CO2 Forcing (W/m2)",
+                                          "Tgav" = "Global Mean Temperature (degrees C)")))+
+             ylab(NULL)
 
 ##Setting Parameters
 #Getting Beta value
@@ -59,10 +61,11 @@ ggplot(compare_results) +
   aes(x = year, y = value, color = factor(beta)) +
   geom_line() +
   facet_wrap(~variable, scales = "free_y", 
-             labeller = labeller(variable = c("Ca" = "CO2 Concentration",
-                                              "Ftot" = "Total Radiative Forcing",
-                                              "FCO2" = "CO2 Forcing",
-                                              "Tgav" = "Global Mean Temperature"))) +
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
+                                   "Ftot" = "Total Radiative Forcing (W/m2)",
+                                   "FCO2" = "CO2 Forcing (W/m2)",
+                                   "Tgav" = "Global Mean Temperature (degrees C)")))+
+  ylab(NULL)+
   guides(color = guide_legend(title = expression(beta)))
 
 ##Sensitivity analysis 
@@ -91,10 +94,11 @@ ggplot(sensitivity_beta) +
   aes(x = year, y = value, color = parameter_value, group = parameter_value) +
   geom_line() +
   facet_wrap(~variable, scales = "free_y", 
-             labeller = labeller(variable = c("Ca" = "CO2 Concentration",
-                                              "Ftot" = "Total Radiative Forcing",
-                                              "FCO2" = "CO2 Forcing",
-                                              "Tgav" = "Global Mean Temperature"))) +
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
+                                              "Ftot" = "Total Radiative Forcing (W/m2)",
+                                              "FCO2" = "CO2 Forcing (W/m2)",
+                                              "Tgav" = "Global Mean Temperature (degrees C)")))+
+  ylab(NULL)+
   guides(color = guide_colorbar(title = expression(beta))) +
   scale_color_viridis_c() 
 
