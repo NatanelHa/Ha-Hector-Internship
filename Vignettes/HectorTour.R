@@ -103,5 +103,38 @@ ggplot(sensitivity_beta) +
   guides(color = guide_colorbar(title = expression(beta))) +
   scale_color_viridis_c() 
 
+#Specifically look at a range of Beta values
+sensitivity_warming_factor <- run_with_param_range(core, WARMINGFACTOR(), seq(0, 2, 0.1))
+
+#Plotting the range of different values 
+ggplot(sensitivity_warming_factor) +
+  aes(x = year, y = value, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
+                                              "Ftot" = "Total Radiative Forcing (W/m2)",
+                                              "FCO2" = "CO2 Forcing (W/m2)",
+                                              "Tgav" = "Global Mean Temperature (degrees C)")))+
+  ylab(NULL)+
+  guides(color = guide_colorbar(title = "Warming Factor")) +
+  scale_color_viridis_c() 
+
+#Specifically look at a range of Beta values
+sensitivity_preindustrial_CO2 <- run_with_param_range(core, PREINDUSTRIAL_CO2(), seq(100, 400, 10))
+
+#Plotting the range of different values 
+ggplot(sensitivity_preindustrial_CO2) +
+  aes(x = year, y = value, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
+                                              "Ftot" = "Total Radiative Forcing (W/m2)",
+                                              "FCO2" = "CO2 Forcing (W/m2)",
+                                              "Tgav" = "Global Mean Temperature (degrees C)")))+
+  ylab(NULL)+
+  guides(color = guide_colorbar(title = "Preindustrial CO2")) +
+  scale_color_viridis_c() 
+
+
 #Shutting down
 shutdown(core)
