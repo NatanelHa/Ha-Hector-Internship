@@ -1,6 +1,7 @@
 #Importing Libraries 
 library(hector)
 library(ggplot2)
+library(dplyr)
 
 #Creating Multiple Cores
 rcp26 <- system.file("input", "hector_rcp26.ini", package = "hector")
@@ -30,11 +31,19 @@ results85 <- fetchvars(core85, 2000:2200, result_vars, scenario = "RCP 8.5")
 
 results <- rbind(results26,results45, results60, results85)
 
+results %>%
+  mutate(uncalibrated = (2100<year))->
+  results
+
 #Plot Results
 ggplot(results)+
-  aes(x = year, y = value, color = scenario) +
+  aes(x = year, y = value, color = scenario, linetype = uncalibrated) +
   geom_line() +
-  facet_wrap(~variable, scales = "free_y")+
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("atmos_c" = "Atmospheric Carbon",
+                                              "veg_c" = "Vegetation Carbon",
+                                              "soil_c" = "Soil Carbon",
+                                              "detritus_c" = "Detritus Carbon ")))+
   ylab("Carbon (Pg C)")
 
 
