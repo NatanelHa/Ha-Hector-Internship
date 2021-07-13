@@ -18,12 +18,13 @@ run(core)
 results <- fetchvars(core, 2000:2300)
 head(results) 
 
+
 #Plotting Results
 ggplot(results) +
   aes(x = year, y = value) +
   geom_line() +
   facet_wrap(~variable, scales = "free_y", 
-             labeller = labeller(variable = c("Ca" = TeX('(CO2 Concentration (ppmv CO@))'),
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
                                           "Ftot" = "Total Radiative Forcing (W/m2)",
                                           "FCO2" = "CO2 Forcing (W/m2)",
                                           "Tgav" = "Global Mean Temperature (degrees C)")))+

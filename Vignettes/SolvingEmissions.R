@@ -1,9 +1,9 @@
-#Importing Libraryes
+#Importing Libraries
 library('ggplot2')
 library('hector')
 
 #Configuring and running Hector
-hector_inifile <- file.path(system.file('input', package='hector'), 'hector_rcp60.ini')
+hector_inifile <- file.path(system.file('input', package='hector'), 'hector_rcp45.ini')
 hcore <- newcore(hector_inifile, suppresslogging=TRUE)
 run(hcore, 1999)
 
@@ -36,3 +36,4 @@ ggplot2::ggplot(data = df, aes(year, value)) +
 
 #Shutting down
 shutdown(hcore)
+
