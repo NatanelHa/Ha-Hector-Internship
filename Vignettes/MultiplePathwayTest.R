@@ -70,5 +70,33 @@ ggplot(results)+
                                               "Tgav_ocean_ST" = "Ocean Surface")))+
   ylab("Temperature (Degrees Celsius)")
 
+#Retrieve Results Temperature
+result_vars <- c(GLOBAL_TEMP(), OCEAN_AIR_TEMP(), OCEAN_SURFACE_TEMP(), LAND_AIR_TEMP())
+results26 <- fetchvars(core26, 2000:2200, result_vars, scenario = "RCP 2.6")
+results45 <- fetchvars(core45, 2000:2200, result_vars, scenario = "RCP 4.5")
+results60 <- fetchvars(core60, 2000:2200, result_vars, scenario = "RCP 6.0")
+results85 <- fetchvars(core85, 2000:2200, result_vars, scenario = "RCP 8.5")
+
+results <- rbind(results26,results45, results60, results85)
+
+results %>%
+  mutate(uncalibrated = (2100<year))->
+  results
+
+#Plot Results
+ggplot(results)+
+  aes(x = year, y = value, color = scenario, linetype = uncalibrated) +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Tgav" = "Global",
+                                              "Tgav_land" = "Land",
+                                              "Tgav_ocean_air" = "Ocean Air",
+                                              "Tgav_ocean_ST" = "Ocean Surface")))+
+  ylab("Temperature (Degrees Celsius)")
 
 
+#Shutdown Cores
+shutdown(core26)
+shutdown(core45)
+shutdown(core60)
+shutdown(core85)
