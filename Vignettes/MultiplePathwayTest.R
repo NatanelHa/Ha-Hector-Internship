@@ -70,8 +70,8 @@ ggplot(results)+
                                               "Tgav_ocean_ST" = "Ocean Surface")))+
   ylab("Temperature (Degrees Celsius)")
 
-#Retrieve Results Temperature
-result_vars <- c(GLOBAL_TEMP(), OCEAN_AIR_TEMP(), OCEAN_SURFACE_TEMP(), LAND_AIR_TEMP())
+#Retrieve Results Atmosphere
+result_vars <- c(ATMOSPHERIC_CO2(), ATMOSPHERIC_N2O(), ATMOSPHERIC_O3(), ATMOSPHERIC_CH4())
 results26 <- fetchvars(core26, 2000:2200, result_vars, scenario = "RCP 2.6")
 results45 <- fetchvars(core45, 2000:2200, result_vars, scenario = "RCP 4.5")
 results60 <- fetchvars(core60, 2000:2200, result_vars, scenario = "RCP 6.0")
@@ -85,14 +85,13 @@ results %>%
 
 #Plot Results
 ggplot(results)+
-  aes(x = year, y = value, color = scenario, linetype = uncalibrated) +
+  aes(x = year, y = value, color = variable)+
   geom_line() +
-  facet_wrap(~variable, scales = "free_y", 
-             labeller = labeller(variable = c("Tgav" = "Global",
-                                              "Tgav_land" = "Land",
-                                              "Tgav_ocean_air" = "Ocean Air",
-                                              "Tgav_ocean_ST" = "Ocean Surface")))+
-  ylab("Temperature (Degrees Celsius)")
+  facet_wrap(~scenario, scale = "free_y")+
+  scale_color_manual(labels = c("CO2 (ppmv)", "CH4 (ppbv)",
+                                "N20 (ppbv)","O3 (NU)"),
+                     values = c("red", "green", "blue", "purple"))+
+  ylab("Atmospheric Concentration")
 
 
 #Shutdown Cores
