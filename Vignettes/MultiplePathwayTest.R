@@ -116,6 +116,27 @@ ggplot(final_results)+
                                               "detritus_c" = "Detritus")))+
   ylab("Carbon (Pg C)")
 
+#Overlaying years with Temperature
+result_vars <- c(GLOBAL_TEMP(), OCEAN_AIR_TEMP(), OCEAN_SURFACE_TEMP(), LAND_AIR_TEMP())
+resultsFirst <- fetchvars(core45, 2000:2099, result_vars, scenario = "21st Century")
+resultsSecond <- fetchvars(core45, 2100:2199, result_vars, scenario = "22nd Century")
+resultsThird <- fetchvars(core45, 2200:2299, result_vars, scenario = "23rd Century")
+
+rbind(resultsFirst, resultsSecond, resultsThird) %>%
+  mutate(yearIntoCentury = year %% 100) ->
+  final_results
+
+ggplot(final_results)+
+  aes(x = yearIntoCentury, y = value, color = scenario)+
+  geom_line() +
+  facet_wrap(~scenario, scale = "free_y")+
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Tgav" = "Global",
+                                              "Tgav_land" = "Land",
+                                              "Tgav_ocean_air" = "Ocean Air",
+                                              "Tgav_ocean_ST" = "Ocean Surface")))+
+  ylab("Temperature (Degrees Celsius)")
+
 #Shutdown Cores
 shutdown(core26)
 shutdown(core45)
