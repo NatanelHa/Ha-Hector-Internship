@@ -106,7 +106,6 @@ results45 %>%
 ggplot(final_results)+
   aes(x = yearIntoCentury, y = value, color = Century, group = Century)+
   geom_line() +
-  facet_wrap(~scenario, scale = "free_y")+
   facet_wrap(~variable, scales = "free_y", 
              labeller = labeller(variable = c("atmos_c" = "Atmospheric",
                                               "veg_c" = "Vegetation",
@@ -127,7 +126,6 @@ results45 %>%
 ggplot(final_results)+
   aes(x = yearIntoCentury, y = value, color = Century, group = Century)+
   geom_line() +
-  facet_wrap(~scenario, scale = "free_y")+
   facet_wrap(~variable, scales = "free_y", 
              labeller = labeller(variable = c("Tgav" = "Global",
                                               "Tgav_land" = "Land",
@@ -135,7 +133,47 @@ ggplot(final_results)+
                                               "Tgav_ocean_ST" = "Ocean Surface")))+
   ylab("Temperature (Degrees Celsius)")
 
+#Overalying Multiple Pathways and Multiple Centuries for Carbon
+result_vars <- c(ATMOSPHERIC_C(), SOIL_C(), DETRITUS_C(), VEG_C())
+results45 <- fetchvars(core45, 2000:2300, result_vars, scenario = "RCP 4.5")
+results85 <- fetchvars(core85, 2000:2300, result_vars, scenario = "RCP 8.5")
 
+rbind(results45, results85)  %>%
+  mutate(yearIntoCentury = year %% 100) %>%
+  mutate(Century = as.character(ceiling(year/100)))%>%
+  filter(yearIntoCentury >0)->
+  final_results
+
+ggplot(final_results)+
+  aes(x = yearIntoCentury, y = value, color = Century, linetype = scenario)+
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("atmos_c" = "Atmospheric",
+                                              "veg_c" = "Vegetation",
+                                              "soil_c" = "Soil",
+                                              "detritus_c" = "Detritus")))+
+  ylab("Carbon (Pg C)")
+
+#Overalying Multiple Pathways and Multiple Centuries for Temp
+result_vars <- c(GLOBAL_TEMP(), OCEAN_AIR_TEMP(), OCEAN_SURFACE_TEMP(), LAND_AIR_TEMP())
+results45 <- fetchvars(core45, 2000:2300, result_vars, scenario = "RCP 4.5")
+results85 <- fetchvars(core85, 2000:2300, result_vars, scenario = "RCP 8.5")
+
+rbind(results45, results85)  %>%
+  mutate(yearIntoCentury = year %% 100) %>%
+  mutate(Century = as.character(ceiling(year/100)))%>%
+  filter(yearIntoCentury >0)->
+  final_results
+
+ggplot(final_results)+
+  aes(x = yearIntoCentury, y = value, color = Century, linetype = scenario)+
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("Tgav" = "Global",
+                                              "Tgav_land" = "Land",
+                                              "Tgav_ocean_air" = "Ocean Air",
+                                              "Tgav_ocean_ST" = "Ocean Surface")))+
+  ylab("Temperature (Degrees Celsius)")
 
 #Shutdown Cores
 shutdown(core26)
