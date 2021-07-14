@@ -93,20 +93,18 @@ ggplot(results)+
                      values = c("red", "green", "blue", "purple"))+
   ylab("Atmospheric Concentration")
 
-#Overlaying years
-reset(core45)
-run(core45)
+#Overlaying years with Carbon
 result_vars <- c(ATMOSPHERIC_C(), SOIL_C(), DETRITUS_C(), VEG_C())
-resultsFirst <- fetchvars(core45, 2000:2099, result_vars, scenario = "21st Century")
-resultsSecond <- fetchvars(core45, 2100:2199, result_vars, scenario = "22nd Century")
-resultsThird <- fetchvars(core45, 2200:2299, result_vars, scenario = "23rd Century")
+results45 <- fetchvars(core45, 2000:2300, result_vars, scenario = "RCP 4.5")
 
-rbind(resultsFirst, resultsSecond, resultsThird) %>%
-  mutate(yearIntoCentury = year %% 100) ->
+results45 %>%
+  mutate(yearIntoCentury = year %% 100) %>%
+  mutate(Century = as.character(ceiling(year/100)))%>%
+  filter(yearIntoCentury >0)->
   final_results
 
 ggplot(final_results)+
-  aes(x = yearIntoCentury, y = value, color = scenario)+
+  aes(x = yearIntoCentury, y = value, color = Century, group = Century)+
   geom_line() +
   facet_wrap(~scenario, scale = "free_y")+
   facet_wrap(~variable, scales = "free_y", 
@@ -118,16 +116,16 @@ ggplot(final_results)+
 
 #Overlaying years with Temperature
 result_vars <- c(GLOBAL_TEMP(), OCEAN_AIR_TEMP(), OCEAN_SURFACE_TEMP(), LAND_AIR_TEMP())
-resultsFirst <- fetchvars(core45, 2000:2099, result_vars, scenario = "21st Century")
-resultsSecond <- fetchvars(core45, 2100:2199, result_vars, scenario = "22nd Century")
-resultsThird <- fetchvars(core45, 2200:2299, result_vars, scenario = "23rd Century")
+results45 <- fetchvars(core45, 2000:2300, result_vars, scenario = "RCP 4.5")
 
-rbind(resultsFirst, resultsSecond, resultsThird) %>%
-  mutate(yearIntoCentury = year %% 100) ->
+results45 %>%
+  mutate(yearIntoCentury = year %% 100) %>%
+  mutate(Century = as.character(ceiling(year/100)))%>%
+  filter(yearIntoCentury >0)->
   final_results
 
 ggplot(final_results)+
-  aes(x = yearIntoCentury, y = value, color = scenario)+
+  aes(x = yearIntoCentury, y = value, color = Century, group = Century)+
   geom_line() +
   facet_wrap(~scenario, scale = "free_y")+
   facet_wrap(~variable, scales = "free_y", 
@@ -136,6 +134,8 @@ ggplot(final_results)+
                                               "Tgav_ocean_air" = "Ocean Air",
                                               "Tgav_ocean_ST" = "Ocean Surface")))+
   ylab("Temperature (Degrees Celsius)")
+
+
 
 #Shutdown Cores
 shutdown(core26)
