@@ -42,3 +42,67 @@ ggplot(final_results) +
                                               "soil_c" = "Soil Carbon (Pg C)")))+
   ylab(NULL)+
   guides(color = guide_legend(title = "Warming Factor"))
+
+
+##Multiple Biomes Experimentation
+
+reset(core)
+run(core, 2100)
+
+result_vars <- c(ATMOSPHERIC_CO2(), RF_TOTAL(), GLOBAL_TEMP(),
+                 VEG_C(), SOIL_C(), DETRITUS_C())
+
+base_results <- fetchvars(core, 2000:2100, result_vars, scenario = "reference")
+
+#Redoing run with high-latitude warming
+reset(core)
+split_biome(core, "global", c("Northern-Hemisphere", "Southern-Hemisphere"),
+            fveg_c = c(0.6, 0.4),
+            fdetritus_c = c(0.7, 0.3),
+            fsoil_c = c(0.8, 0.2))
+            
+run(core, 2100)
+hemisphere_split_results <- fetchvars(core, 2000:2100, result_vars, scenario = "Hemisphere_split")
+
+#Plotting the results 
+plot_data <- rbind(base_results, hemisphere_split_results)
+plot_data$variable <- factor(plot_data$variable, result_vars)
+
+ggplot(plot_data) +
+  aes(x = year, y =value, color = scenario) +
+  geom_line()+
+  facet_wrap(vars(variable), scales = "free_y",
+             labeller = labeller(variable = c("Ca" = "CO2 Concentration (ppmv CO2)",
+                                              "Ftot" = "Total Radiative Forcing (W/m2)",
+                                              "Tgav" = "Global Mean Temperature (degrees C)",
+                                              "veg_c" = "Vegetation Carbon (Pg C)",
+                                              "soil_c" = "Soil Carbon (Pg C)",
+                                              "detritus_c" = "Detritus Carbon (Pg C)")))+
+  theme_bw()
+
+#Examining the biome specific pools
+hemisphere_details <- fetchvars(core, 2000:2100, 
+                             c(VEG_C("Northern-Hemisphere"), VEG_C("Southern-Hemisphere"),
+                               DETRITUS_C("Northern-Hemisphere"), DETRITUS_C("Southern-Hemisphere"),
+                               SOIL_C("Northern-Hemisphere"), SOIL_C("Southern-Hemisphere")),
+                             scenario = "Hemisphere_split")
+head(hemisphere_details)
+
+#Splitting variable column into components
+variable_split <- strsplit(hemisphere_details$variable,".", fixed = TRUE)
+hemisphere_details$biome <- factor(vapply(variable_split, "[[", character(1),1),
+                                c("Northern-Hemisphere", "Southern-Hemisphere"))
+hemisphere_details$variable <- vapply(variable_split, "[[", character(1), 2)
+
+#Plotting low and high latitude
+ggplot(hemisphere_details)+
+  aes(x = year, y=value, color=biome)+
+  geom_line()+
+  facet_wrap(vars(variable), scales = "free_y",
+             labeller = labeller(variable = c("veg_c" = "Vegetation Carbon (Pg C)",
+                                              "soil_c" = "Soil Carbon (Pg C)",
+                                              "detritus_c" = "Detritus Carbon (Pg C)")))+
+  theme_bw()
+
+
+

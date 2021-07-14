@@ -43,7 +43,7 @@ warming_details <- fetchvars(core, 2000:2100,
                              scenario = "warming")
 head(warming_details)
 
-#Splitting variable columb into components
+#Splitting variable column into components
 variable_split <- strsplit(warming_details$variable,".", fixed = TRUE)
 warming_details$biome <- factor(vapply(variable_split, "[[", character(1),1),
                                 c("low-latitude", "high-latitude"))
