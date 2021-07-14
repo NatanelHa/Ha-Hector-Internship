@@ -51,6 +51,42 @@ ggplot(results)+
   facet_wrap(~year)+
   guides(fill = guide_legend(title = "Carbon Pools"))
 
+#Retrieve Results
+result_vars <- c(GLOBAL_TEMP(), OCEAN_AIR_TEMP(), OCEAN_SURFACE_TEMP(), LAND_AIR_TEMP())
+results26 <- fetchvars(core26, 2000:2300, result_vars, scenario = "RCP 2.6")
+results45 <- fetchvars(core45, 2000:2300, result_vars, scenario = "RCP 4.5")
+results85 <- fetchvars(core85, 2000:2300, result_vars, scenario = "RCP 8.5")
+
+results <- rbind(results26, results45, results85)
+
+
+#Plotting as an area curve
+
+#Filtering for centuries
+results %>%
+  filter(year %% 100 == 0 & year > 2000)->
+  results
+
+#Plotting as a bar chart, by scenario
+ggplot(results)+
+  aes(x = year, y = value, group = scenario, fill = variable)+
+  geom_bar(stat = "identity",
+           position = "dodge2")+
+  ylab("Temperature (Degrees Celsius)") +
+  scale_fill_discrete(labels = c("Global", "Land", "Ocean Air", "Ocean Surface"))+
+  facet_wrap(~scenario)+
+  guides(fill = guide_legend(title = "Average Temperature"))
+
+#Plotting as bar chart, by year
+ggplot(results)+
+  aes(x = scenario, y = value, group = scenario, fill = variable)+
+  geom_bar(stat = "identity",
+           position = "dodge2")+
+  ylab("Temperature (Degrees Celsius)") +
+  scale_fill_discrete(labels = c("Global", "Land", "Ocean Air", "Ocean Surface"))+
+  facet_wrap(~year)+
+  guides(fill = guide_legend(title = "Average Temperature"))
+
 
 #Shutdown Core
 shutdown(core26)
