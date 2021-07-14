@@ -93,6 +93,28 @@ ggplot(results)+
                      values = c("red", "green", "blue", "purple"))+
   ylab("Atmospheric Concentration")
 
+#Overlaying years
+reset(core45)
+run(core45)
+result_vars <- c(ATMOSPHERIC_C(), SOIL_C(), DETRITUS_C(), VEG_C())
+resultsFirst <- fetchvars(core45, 2000:2099, result_vars, scenario = "21st Century")
+resultsSecond <- fetchvars(core45, 2100:2199, result_vars, scenario = "22nd Century")
+resultsThird <- fetchvars(core45, 2200:2299, result_vars, scenario = "23rd Century")
+
+rbind(resultsFirst, resultsSecond, resultsThird) %>%
+  mutate(yearIntoCentury = year %% 100) ->
+  final_results
+
+ggplot(final_results)+
+  aes(x = yearIntoCentury, y = value, color = scenario)+
+  geom_line() +
+  facet_wrap(~scenario, scale = "free_y")+
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("atmos_c" = "Atmospheric",
+                                              "veg_c" = "Vegetation",
+                                              "soil_c" = "Soil",
+                                              "detritus_c" = "Detritus")))+
+  ylab("Carbon (Pg C)")
 
 #Shutdown Cores
 shutdown(core26)
