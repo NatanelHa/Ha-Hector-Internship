@@ -20,25 +20,39 @@ run(core85)
 
 #Retrieve Results
 result_vars <- c(ATMOSPHERIC_C(), SOIL_C(), VEG_C())
-results26 <- fetchvars(core26, 2000:2200, result_vars, scenario = "RCP 2.6")
-results45 <- fetchvars(core45, 2000:2200, result_vars, scenario = "RCP 4.5")
-results85 <- fetchvars(core85, 2000:2200, result_vars, scenario = "RCP 8.5")
+results26 <- fetchvars(core26, 2000:2300, result_vars, scenario = "RCP 2.6")
+results45 <- fetchvars(core45, 2000:2300, result_vars, scenario = "RCP 4.5")
+results85 <- fetchvars(core85, 2000:2300, result_vars, scenario = "RCP 8.5")
 
 results <- rbind(results26, results45, results85)
 
 
-results %>%
-  filter(year %% 100 == 0) ->
-  results
-
+#Plotting as an area curve
 ggplot(results)+
   aes(x = year, y = value, group = scenario, fill = variable)+
   geom_bar(stat = "identity")+
   ylab("Carbon (Pg C)") +
   scale_fill_discrete(labels = c("Atmosphere", "Soil", "Vegetation"))+
+  geom_col(width = 1)+
   facet_wrap(~scenario)+
   guides(fill = guide_legend(title = "Carbon Pools"))
-  
+
+#Filtering for centuries
+results %>%
+  filter(year %% 100 == 0 & year > 2000)->
+  results
+
+#Plotting as a bar chart
+ggplot(results)+
+  aes(x = scenario, y = value, group = scenario, fill = variable)+
+  geom_bar(stat = "identity")+
+  ylab("Carbon (Pg C)") +
+  scale_fill_discrete(labels = c("Atmosphere", "Soil", "Vegetation"))+
+  facet_wrap(~year)+
+  guides(fill = guide_legend(title = "Carbon Pools"))
+
 
 #Shutdown Core
-shutdown(core)
+shutdown(core26)
+shutdown(core45)
+shutdown(core85)
