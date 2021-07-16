@@ -38,7 +38,7 @@ carbonPlot2 <- ggplot(results85)+
   guides(fill = guide_legend(title = "Carbon Pools"))+
   xlab("Year")
 
-##Bar Graph
+##Bar Graph Filtering
 results85 %>%
   filter(year %% 100 == 0)->
   resultsCentury85
@@ -99,7 +99,20 @@ fluxPlot2 <- ggplot(results85flux)+
   ylab("Carbon Flux(Pg C/yr)")+
   xlab("Year")
 
+##Bar Graph Fluxes
+results85flux %>%
+  filter(year %% 100 == 0)->
+  results85fluxCentury
 
+fluxPlot3 <- ggplot(results85fluxCentury)+
+  aes(x = as.character(year), y = value)+
+  geom_bar(stat = "identity")+
+  facet_wrap(~variable, scales = "free_y",
+             labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
+                                              "atm_ocean_flux" = "Ocean Net Flux",
+                                              "atmosphere_flux" = "Atmosphere Net Flux")))+
+  ylab("Carbon Flux(Pg C/yr)") +
+  xlab("Year")
 
 
   
