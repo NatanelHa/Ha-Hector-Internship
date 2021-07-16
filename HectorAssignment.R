@@ -75,8 +75,31 @@ results85flux %>%
   pivot_wider(names_from = variable) %>%
   mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
   select(-ffi_emissions) %>%
-  pivot_longer(3:5)->
+  pivot_longer(3:5, names_to = "variable")->
   results85flux
   
+##Plotting Fluxes
+#Not Facetted
+fluxPlot1 <- ggplot(results85flux)+
+  aes(x = year, y = value, color = variable) +
+  geom_line() +
+  scale_color_discrete(labels = c("Land", "Ocean", "Atmosphere"))+
+  guides(color = guide_legend(title = "Carbon Flux(Pg C/yr)"))+
+  ylab("Carbon Flux(Pg C/yr)")+
+  xlab("Year")
+
+#Facetted
+fluxPlot2 <- ggplot(results85flux)+
+  aes(x = year, y = value) +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y",
+             labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
+                                             "atm_ocean_flux" = "Ocean Net Flux",
+                                            "atmosphere_flux" = "Atmosphere Net Flux")))+
+  ylab("Carbon Flux(Pg C/yr)")+
+  xlab("Year")
 
 
+
+
+  
