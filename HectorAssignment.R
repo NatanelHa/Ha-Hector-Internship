@@ -25,7 +25,8 @@ carbonPlot1 <- ggplot(results85)+
                                               "soil_c" = "Soil",
                                               "detritus_c" = "Detritus",
                                               "ocean_c" = "Ocean")))+
-  ylab("Carbon in Pool(Pg C)")
+  ylab("Carbon (Pg C)")+
+  xlab("Year")
 
 ##Area Graph
 carbonPlot2 <- ggplot(results85)+
@@ -34,7 +35,8 @@ carbonPlot2 <- ggplot(results85)+
   ylab("Carbon (Pg C)") +
   scale_fill_discrete(labels = c("Atmosphere", "Detritus","Ocean", "Soil", "Vegetation"))+
   geom_col(width = 1)+
-  guides(fill = guide_legend(title = "Carbon Pools"))
+  guides(fill = guide_legend(title = "Carbon Pools"))+
+  xlab("Year")
 
 ##Bar Graph
 results85 %>%
@@ -50,7 +52,7 @@ carbonPlot3 <- ggplot(resultsCentury85)+
   guides(fill = guide_legend(title = "Carbon Pools"))+
   xlab("Year")
 
-#Split into sperate Factes
+#Split into separate Facets
 carbonPlot4 <- ggplot(resultsCentury85)+
   aes(x = as.character(year), y = value)+
   geom_bar(stat = "identity")+
@@ -62,4 +64,19 @@ carbonPlot4 <- ggplot(resultsCentury85)+
                                               "ocean_c" = "Ocean")))+
   ylab("Carbon (Pg C)") +
   xlab("Year")
+
+##Looking at fluxes
+result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
+results85flux <- fetchvars(core85, 2000:2100, result_vars, scenario = "RCP 8.5")
+
+#Calculating atmosphere flux
+results85flux %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions) %>%
+  pivot_longer(3:5)->
+  results85flux
+  
+
 
