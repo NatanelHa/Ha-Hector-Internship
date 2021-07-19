@@ -1,0 +1,7 @@
+---
+title: "Hector Assignment"
+author: "Natanel Ha"
+date: "7/19/2021"
+output: html_document
+---
+
