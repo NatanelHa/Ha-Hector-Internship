@@ -295,10 +295,10 @@ areaGraphCompare <- ggplot(resultsC)+
 ##Bar Graph Filtering
 resultsC %>%
   filter(year %% 100 == 0)->
-  resultsCenturyComapre
+  resultsCenturyCompare
 
 #Collected in One Bar
-barPlotCompare <- ggplot(resultsCenturyComapre)+
+barPlotCompare <- ggplot(resultsCenturyCompare)+
   aes(x = scenario, y = value, fill = variable)+
   geom_bar(stat = "identity")+
   ylab("Carbon (Pg C)") +
