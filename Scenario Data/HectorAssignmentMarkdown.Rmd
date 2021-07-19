@@ -5,3 +5,171 @@ date: "7/19/2021"
 output: html_document
 ---
 
+### Importing Libraries 
+```{r importing, message=FALSE, warning=FALSE}
+library(hector)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+### Running RCP 8.5
+
+#### Creating rcp85 Core
+```{r core85, message=FALSE, warning=FALSE}
+rcp85 <- system.file("input", "hector_rcp85.ini", package = "hector")
+core85 <- newcore(rcp85, suppresslogging  = TRUE)
+```
+
+#### Run Core
+```{r run85, message=FALSE, warning=FALSE, results='hide'}
+run(core85)
+```
+
+#### Getting Results for Carbon Pools
+```{r results85, message=FALSE, warning=FALSE}
+result_vars <- c(ATMOSPHERIC_C(), SOIL_C(), VEG_C(), DETRITUS_C(), OCEAN_C())
+results85 <- fetchvars(core85, 2000:2100, result_vars, scenario = "RCP 8.5")
+```
+
+#### Plotting Carbon Pools{.tabset}
+##### Line Graph
+```{r lineGraph85}
+lineGraph85 <- ggplot(results85)+
+  aes(x = year, y = value) +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("atmos_c" = "Atmospheric",
+                                              "veg_c" = "Vegetation",
+                                              "soil_c" = "Soil",
+                                              "detritus_c" = "Detritus",
+                                              "ocean_c" = "Ocean")))+
+  ylab("Carbon (Pg C)")+
+  theme_bw()+
+  xlab("Year")
+lineGraph85
+```
+
+##### Area Graph
+```{r areaGraph85}
+areaGraph85 <- ggplot(results85)+
+  aes(x = year, y = value, group = scenario, fill = variable)+
+  geom_bar(stat = "identity")+
+  ylab("Carbon (Pg C)") +
+  scale_fill_discrete(labels = c("Atmosphere", "Detritus","Ocean", "Soil", "Vegetation"))+
+  geom_col(width = 1)+
+  guides(fill = guide_legend(title = "Carbon Pools"))+
+  xlab("Year")+
+  theme_bw()
+areaGraph85
+```
+
+##### Bar Graph
+```{r barGraph85}
+#Bar Graph Filtering
+results85 %>%
+  filter(year %% 100 == 0)->
+  resultsCentury85
+
+#Plotting
+barPlot85 <- ggplot(resultsCentury85)+
+  aes(x = as.character(year), y = value, fill = variable)+
+  geom_bar(stat = "identity")+
+  ylab("Carbon (Pg C)") +
+  scale_fill_discrete(labels = c("Atmosphere", "Detritus","Ocean", "Soil", "Vegetation"))+
+  guides(fill = guide_legend(title = "Carbon Pools"))+
+  xlab("Year")+
+  theme_bw()
+barPlot85
+```
+
+##### Faceted Bar Graph
+```{r splitBarPlot85}
+#Bar Graph Filtering
+results85 %>%
+  filter(year %% 100 == 0)->
+  resultsCentury85
+
+#PLotting
+splitBarPlot85 <- ggplot(resultsCentury85)+
+  aes(x = as.character(year), y = value)+
+  geom_bar(stat = "identity")+
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("atmos_c" = "Atmospheric",
+                                              "veg_c" = "Vegetation",
+                                              "soil_c" = "Soil",
+                                              "detritus_c" = "Detritus",
+                                              "ocean_c" = "Ocean")))+
+  ylab("Carbon (Pg C)") +
+  xlab("Year")+
+  theme_bw()
+splitBarPlot85
+```
+
+#### Looking At Fluxes
+```{r fluxes, message=FALSE, warning=FALSE}
+result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
+results85flux <- fetchvars(core85, 2000:2100, result_vars, scenario = "RCP 8.5")
+```
+
+#### Calculating atmosphere flux
+```{r atmosphereFlux, message=FALSE, warning=FALSE}
+results85flux %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions) %>%
+  pivot_longer(3:5, names_to = "variable")->
+  results85flux
+```  
+
+#### Plotting Fluxes {.tabset}
+##### Line Graph 
+```{r lineGraphFlux}
+fluxLine85 <- ggplot(results85flux)+
+  aes(x = year, y = value, color = variable) +
+  geom_line() +
+  scale_color_discrete(labels = c("Land", "Ocean", "Atmosphere"))+
+  guides(color = guide_legend(title = "Carbon Flux(Pg C/yr)"))+
+  ylab("Carbon Flux(Pg C/yr)")+
+  xlab("Year")+
+  theme_bw()
+fluxLine85
+```
+
+##### Faceted Line Graph
+```{r fluxFacetLine85}
+fluxFacetLine85 <- ggplot(results85flux)+
+  aes(x = year, y = value) +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y",
+             labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
+                                             "atm_ocean_flux" = "Ocean Net Flux",
+                                            "atmosphere_flux" = "Atmosphere Net Flux")))+
+  ylab("Carbon Flux(Pg C/yr)")+
+  xlab("Year")+
+  theme_bw()
+fluxFacetLine85
+```
+
+##### Bar Graph 
+```{r fluxBar85}
+#Filtering data
+results85flux %>%
+  filter(year %% 100 == 0)->
+  results85fluxCentury
+
+#Plotting
+fluxBar85 <- ggplot(results85fluxCentury)+
+  aes(x = as.character(year), y = value)+
+  geom_bar(stat = "identity")+
+  facet_wrap(~variable, scales = "free_y",
+             labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
+                                              "atm_ocean_flux" = "Ocean Net Flux",
+                                              "atmosphere_flux" = "Atmosphere Net Flux")))+
+  ylab("Carbon Flux(Pg C/yr)") +
+  xlab("Year")+
+  theme_bw()
+fluxBar85
+```
+
