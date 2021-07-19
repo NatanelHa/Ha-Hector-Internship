@@ -2,6 +2,7 @@
 library(hector)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 
 #Creating rcp85 Core
 rcp85 <- system.file("input", "hector_rcp85.ini", package = "hector")
@@ -113,6 +114,15 @@ fluxPlot3 <- ggplot(results85fluxCentury)+
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+
   ylab("Carbon Flux(Pg C/yr)") +
   xlab("Year")
+
+#RCP 8.5 Plots
+carbonPlot1
+carbonPlot2
+carbonPlot3
+carbonPlot4
+fluxPlot1
+fluxPlot2
+fluxPlot3
 
 
   
