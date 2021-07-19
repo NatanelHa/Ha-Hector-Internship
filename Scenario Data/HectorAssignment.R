@@ -386,7 +386,7 @@ run_with_param <- function(core, parameter, value) {
   reset(core)
   run(core)
   result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
-  result <- fetchvars(core, 2000:2100, result_vars, scenario = "RCP 8.5")
+  result <- fetchvars(core, 2000:2100, result_vars)
   result[["parameter_value"]] <- value
   result
 }
@@ -399,7 +399,7 @@ run_with_param_range <- function(core, parameter, values) {
 
 #RCP 85
 #Sensitivity analysis for Beta
-sensitivity_beta <- run_with_param_range(core85, BETA(), seq(0.36, 5.5, 0.12))
+sensitivity_beta <- run_with_param_range(core85, BETA(), seq(0.2, 20, 0.2))
 
 #Calculating Atmosphere Flux
 sensitivity_beta %>%
@@ -419,6 +419,16 @@ ggplot(sensitivity_beta) +
 
 #Reseting Beta
 setvar(core85, NA, BETA(), 0.36, "(unitless)") 
+
+#Finding cutoff
+sensitivity_beta %>%
+  filter(year==2100, atmosphere_flux<=0.5)->
+  working_beta
+  
+min(working_beta$parameter_value)->
+  min_beta
+
+min_beta
 
 #Sensitivity for q10rh
 sensitivity_q10rh <- run_with_param_range(core85, Q10_RH(), seq(0.05, 2, 0.05))
@@ -441,6 +451,16 @@ ggplot(sensitivity_q10rh) +
 
 #Resetting q10rh
 setvar(core85, NA, Q10_RH(), 2, "(unitless)")
+
+#Finding cutoff
+sensitivity_q10rh %>%
+  filter(year==2100, atmosphere_flux<=0.5)->
+  working_q10_rh
+
+max(working_q10_rh$parameter_value)->
+  max_q10rh
+
+max_q10rh
 
 #RCP 4.5
 #Sensitivity analysis for Beta
@@ -465,6 +485,16 @@ ggplot(sensitivity_beta) +
 #Reseting Beta
 setvar(core45, NA, BETA(), 0.36, "(unitless)") 
 
+#Finding cutoff
+sensitivity_beta %>%
+  filter(year==2100, atmosphere_flux<=0.5)->
+  working_beta
+
+min(working_beta$parameter_value)->
+  min_beta
+
+min_beta
+
 #Sensitivity for q10rh
 sensitivity_q10rh <- run_with_param_range(core45, Q10_RH(), seq(0.05, 2, 0.05))
 
@@ -486,3 +516,13 @@ ggplot(sensitivity_q10rh) +
 
 #Resetting q10rh
 setvar(core45, NA, Q10_RH(), 2, "(unitless)")
+
+#Finding cutoff
+sensitivity_q10rh %>%
+  filter(year==2100, atmosphere_flux<=0.5)->
+  working_q10_rh
+
+max(working_q10_rh$parameter_value)->
+  max_q10rh
+
+max_q10rh
