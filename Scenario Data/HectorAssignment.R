@@ -309,7 +309,7 @@ barPlotCompare <- ggplot(resultsCenturyCompare)+
   theme_bw()
 
 #Split into separate Facets
-splitBarPlotCompare <- ggplot(resultsCenturyComapre)+
+splitBarPlotCompare <- ggplot(resultsCenturyCompare)+
   aes(x = as.character(year), y = value, fill = scenario)+
   geom_bar(stat = "identity", position = "dodge")+
   facet_wrap(~variable, scales = "free_y", 
@@ -370,3 +370,119 @@ fluxLineCompare
 fluxFacetLineCompare
 fluxBarCompare
 
+## Finding lowest change that gives below 0.5 Pg/c Atmosphere Flux
+##Finding out what the current values of beta and Q10_RH
+beta <- fetchvars(core85, NA, BETA())
+beta 
+q10rh <- fetchvars(core85, NA, Q10_RH())
+q10rh 
+
+##Sensitivity analysis 
+#Function to run Hector with a parameter
+run_with_param <- function(core, parameter, value) {
+  old_value <- fetchvars(core, NA, parameter)
+  unit <- as.character(old_value[["units"]])
+  setvar(core, NA, parameter, value, unit)
+  reset(core)
+  run(core)
+  result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
+  result <- fetchvars(core, 2000:2100, result_vars, scenario = "RCP 8.5")
+  result[["parameter_value"]] <- value
+  result
+}
+
+#Run Hector with a range of parameter values
+run_with_param_range <- function(core, parameter, values) {
+  mapped <- Map(function(x) run_with_param(core, parameter, x), values)
+  Reduce(rbind, mapped)
+}
+
+#RCP 85
+#Sensitivity analysis for Beta
+sensitivity_beta <- run_with_param_range(core85, BETA(), seq(0.36, 5.5, 0.12))
+
+#Calculating Atmosphere Flux
+sensitivity_beta %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+  sensitivity_beta
+
+#Plotting the range of different values 
+ggplot(sensitivity_beta) +
+  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  ylab("Atmosphheric flux (Pg C/yr)")+
+  guides(color = guide_colorbar(title = expression(beta))) +
+  scale_color_viridis_c() 
+
+#Reseting Beta
+setvar(core85, NA, BETA(), 0.36, "(unitless)") 
+
+#Sensitivity for q10rh
+sensitivity_q10rh <- run_with_param_range(core85, Q10_RH(), seq(0.05, 2, 0.05))
+
+#Calculating Atmosphere Flux
+sensitivity_q10rh %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+  sensitivity_q10rh
+
+#Plotting the range of different values 
+ggplot(sensitivity_q10rh) +
+  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  ylab("Atmosphheric flux (Pg C/yr)")+
+  guides(color = guide_colorbar(title = "Q10_RH")) +
+  scale_color_viridis_c()
+
+#Resetting q10rh
+setvar(core85, NA, Q10_RH(), 2, "(unitless)")
+
+#RCP 4.5
+#Sensitivity analysis for Beta
+sensitivity_beta <- run_with_param_range(core45, BETA(), seq(0.36, 5.5, 0.12))
+
+#Calculating Atmosphere Flux
+sensitivity_beta %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+  sensitivity_beta
+
+#Plotting the range of different values 
+ggplot(sensitivity_beta) +
+  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  ylab("Atmosphheric flux (Pg C/yr)")+
+  guides(color = guide_colorbar(title = expression(beta))) +
+  scale_color_viridis_c() 
+
+#Reseting Beta
+setvar(core45, NA, BETA(), 0.36, "(unitless)") 
+
+#Sensitivity for q10rh
+sensitivity_q10rh <- run_with_param_range(core45, Q10_RH(), seq(0.05, 2, 0.05))
+
+#Calculating Atmosphere Flux
+sensitivity_q10rh %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+  sensitivity_q10rh
+
+#Plotting the range of different values 
+ggplot(sensitivity_q10rh) +
+  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  ylab("Atmosphheric flux (Pg C/yr)")+
+  guides(color = guide_colorbar(title = "Q10_RH")) +
+  scale_color_viridis_c()
+
+#Resetting q10rh
+setvar(core45, NA, Q10_RH(), 2, "(unitless)")
