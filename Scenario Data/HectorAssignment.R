@@ -462,9 +462,48 @@ max(working_q10_rh$parameter_value)->
 
 max_q10rh
 
+setvar(core85, NA, BETA(), 18, "(unitless)") 
+sensitivity_q10rh <- run_with_param_range(core85, Q10_RH(), seq(0.05, 2, 0.05))
+
+sensitivity_q10rh %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+  sensitivity_q10rh
+
+#Plotting the range of different values 
+ggplot(sensitivity_q10rh) +
+  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  ylab("Atmosphheric flux (Pg C/yr)")+
+  guides(color = guide_colorbar(title = "Q10_RH")) +
+  scale_color_viridis_c()
+
+#Resetting q10rh
+setvar(core85, NA, Q10_RH(), 2, "(unitless)")
+
+#Finding cutoff
+sensitivity_q10rh %>%
+  filter(year==2100, atmosphere_flux<=0.5)->
+  working_q10_rh
+
+max(working_q10_rh$parameter_value)->
+  max_q10rh
+
+max_q10rh
+
+##Pairs that I found work
+#beta: 14 and q10_rh: 0.1
+#beta: 15 and q10_rh: 0.3
+#beta: 16 and q10_rh: 0.75
+#beta: 17 and q10_rh: 1.2
+#beta: 18 and q10_rh: 1.65
+#beta: 18.8 and q10_rh: 2
+
 #RCP 4.5
 #Sensitivity analysis for Beta
-sensitivity_beta <- run_with_param_range(core45, BETA(), seq(0.36, 5.5, 0.12))
+sensitivity_beta <- run_with_param_range(core45, BETA(), seq(0.36, 2, 0.04))
 
 #Calculating Atmosphere Flux
 sensitivity_beta %>%
@@ -526,3 +565,43 @@ max(working_q10_rh$parameter_value)->
   max_q10rh
 
 max_q10rh
+
+setvar(core45, NA, BETA(), 0.52, "(unitless)") 
+
+sensitivity_q10rh <- run_with_param_range(core45, Q10_RH(), seq(1.8, 2, 0.005))
+
+sensitivity_q10rh %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+  sensitivity_q10rh
+
+#Plotting the range of different values 
+ggplot(sensitivity_q10rh) +
+  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+  geom_line() +
+  ylab("Atmosphheric flux (Pg C/yr)")+
+  guides(color = guide_colorbar(title = "Q10_RH")) +
+  scale_color_viridis_c()
+
+#Resetting q10rh
+setvar(core85, NA, Q10_RH(), 2, "(unitless)")
+
+#Finding cutoff
+sensitivity_q10rh %>%
+  filter(year==2100, atmosphere_flux<=0.5)->
+  working_q10_rh
+
+max(working_q10_rh$parameter_value)->
+  max_q10rh
+
+max_q10rh
+
+#Pairs that I found work
+#beta: 0.36 and q10_rh: 1.835
+#beta: 0.40 and q10_rh: 1.880
+#beta: 0.44 and q10_rh: 1.925
+#beta: 0.48 and q10_rh: 1.960
+#beta: 0.52 and q10_rh: 1.990
+#beta: 0.56 and q10_rh: 2
