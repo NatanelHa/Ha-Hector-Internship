@@ -437,66 +437,18 @@ sensitivity_analysis <- function(core, parameter, sequence){
   return(first(working$parameter_value))
 }
 
+find_values <- function(core, betaValues, q10rhValues){
+  beta <- betaValues
+  q10_rh <- c()
+  for(val in betaValues){
+    setvar(core, NA, BETA(), val, "(unitless)")
+    q10_rh <- append(q10_rh, sensitivity_analysis(core, Q10_RH(), q10rhValues))
+  }
+  return(data.frame(beta, q10_rh))
+}
+
 #RCP 8.5
-sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
-sensitivity_plot
-
-setvar(core85, NA, BETA(), 14, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 15, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 16, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 17, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 18, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 19, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 0.36, "(unitless)")
-
-##Pairs that I found work
-#beta: 14 and q10_rh: 0.05
-#beta: 15 and q10_rh: 0.3
-#beta: 16 and q10_rh: 0.75
-#beta: 17 and q10_rh: 1.2
-#beta: 18 and q10_rh: 1.65
-#beta: 19 and q10_rh: 2
+find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 
 #RCP 4.5
-#Pairs that I found work
-sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
-sensitivity_plot
-
-setvar(core85, NA, BETA(), 0.36, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 0.4, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 0.44, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 0.48, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 0.52, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 0.56, "(unitless)")
-sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
-
-setvar(core85, NA, BETA(), 0.36, "(unitless)")
-
-#beta: 0.36 and q10_rh: 1.835
-#beta: 0.40 and q10_rh: 1.880
-#beta: 0.44 and q10_rh: 1.925
-#beta: 0.48 and q10_rh: 1.960
-#beta: 0.52 and q10_rh: 1.990
-#beta: 0.56 and q10_rh: 2
+find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
