@@ -444,11 +444,24 @@ find_values <- function(core, betaValues, q10rhValues){
     setvar(core, NA, BETA(), val, "(unitless)")
     q10_rh <- append(q10_rh, sensitivity_analysis(core, Q10_RH(), q10rhValues))
   }
+  setvar(core, NA, BETA(), 0.36, "(unitless)")
   return(data.frame(beta, q10_rh))
 }
 
 #RCP 8.5
+sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
+sensitivity_plot
+
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+sensitivity_plot
+
 find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 
 #RCP 4.5
+sensitivity_analysis(core45, BETA(), seq(0,2,0.05))
+sensitivity_plot
+
+sensitivity_analysis(core45, Q10_RH(), seq(1,2,0.025))
+sensitivity_plot
+
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
