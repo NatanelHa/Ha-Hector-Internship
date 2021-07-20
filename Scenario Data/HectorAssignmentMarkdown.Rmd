@@ -580,9 +580,19 @@ sensitivity_plot
 ```
 
 #### Working Values
-```{r findingValues85}
+```{r findingValues85, results='hide'}
 find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 ```
+
+```{r findingValues85table, echo=FALSE}
+library(kableExtra)
+find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05)) %>%
+  kbl %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, 
+                position = "left")
+```
+
+
 
 #### Finding values for RCP 4.5 {.tabset}
 ##### Beta Plot
@@ -598,6 +608,13 @@ sensitivity_plot
 ```
 
 #### Working Values
-```{r findingValues45}
+```{r findingValues45, results='hide'}
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
+```
+
+```{r findingValues45table, echo=FALSE}
+find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01)) %>%
+  kbl %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, 
+                position = "left")
 ```
