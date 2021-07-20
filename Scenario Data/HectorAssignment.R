@@ -465,3 +465,7 @@ sensitivity_analysis(core45, Q10_RH(), seq(1,2,0.025))
 sensitivity_plot
 
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
+
+#Shutting down Cores
+shutdown(core85)
+shutdown(core45)

@@ -580,7 +580,7 @@ sensitivity_plot
 ```
 
 #### Working Values
-```{r findingValues85, results='hide'}
+```{r findingValues85, eval=FALSE, results='hide'}
 find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 ```
 
@@ -608,7 +608,7 @@ sensitivity_plot
 ```
 
 #### Working Values
-```{r findingValues45, results='hide'}
+```{r findingValues45, eval=FALSE, results='hide'}
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
 ```
 
@@ -618,3 +618,14 @@ find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01)) %>%
   kable_styling(bootstrap_options = "striped", full_width = F, 
                 position = "left")
 ```
+### Shutting Down Cores
+```{r shutdown, results='hide'}
+shutdown(core85)
+shutdown(core45)
+```
+
+### Session Info: 
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
+
