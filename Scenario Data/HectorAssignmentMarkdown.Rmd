@@ -467,3 +467,137 @@ fluxBarCompare <- ggplot(resultsFluxCentury)+
   xlab("Year")
 fluxBarCompare
 ```
+
+### Net Atmosphere flux below 0.5 Pg C/yr in 2100
+Changing beta and q10_RH to get the Atmospheric flux to be below 0.5 Pg C/yr
+
+#### Finding out what the current values of beta and Q10_RH
+```{r currentValues}
+beta <- fetchvars(core85, NA, BETA())
+beta 
+q10rh <- fetchvars(core85, NA, Q10_RH())
+q10rh 
+
+beta <- fetchvars(core45, NA, BETA())
+beta 
+q10rh <- fetchvars(core45, NA, Q10_RH())
+q10rh 
+```
+
+#### Sensitivity Analysis Functions
+##### Function to run Hector with a certain parameter change 
+```{r param}
+run_with_param <- function(core, parameter, value) {
+  old_value <- fetchvars(core, NA, parameter)
+  unit <- as.character(old_value[["units"]])
+  setvar(core, NA, parameter, value, unit)
+  reset(core)
+  run(core)
+  result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
+  result <- fetchvars(core, 2000:2100, result_vars)
+  result[["parameter_value"]] <- value
+  result
+}
+```
+
+#### Function to Run Hector with a range of parameter values
+```{r paramRange}
+run_with_param_range <- function(core, parameter, values) {
+  mapped <- Map(function(x) run_with_param(core, parameter, x), values)
+  Reduce(rbind, mapped)
+}
+```
+
+#### Function to Perform Sensitivity Analysis 
+```{r sensitivity}
+sensitivity_analysis <- function(core, parameter, sequence){
+  #Get Old value
+  old_value <- fetchvars(core, NA, parameter)
+  unit <- as.character(old_value[["units"]])
+  
+  #Sensitivity 
+  sensitivity <- run_with_param_range(core, parameter, sequence)
+  
+  #Calculating Atmosphere Flux
+  sensitivity %>%
+    select(-units) %>%
+    pivot_wider(names_from = variable) %>%
+    mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+    select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+    sensitivity
+  
+  #Create plot
+  sensitivity_plot <<- ggplot(sensitivity) +
+    aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+    geom_line() +
+    ylab("Atmosphheric flux (Pg C/yr)")+
+    guides(color = guide_colorbar(title = parameter)) +
+    scale_color_viridis_c() 
+  
+  #Reset var
+  setvar(core, NA, parameter, first(old_value$value), unit) 
+  
+  #Finding cutoff
+  sensitivity %>%
+    filter(year==2100, atmosphere_flux<=0.5)->
+    working
+  
+  #Finding the parameter with least change 
+  working %>%
+    mutate(distance = abs(parameter_value - first(old_value$value)))%>%
+    arrange(distance)->
+    working
+  
+  return(first(working$parameter_value))
+}
+```
+
+#### Function to Find Specific beta and q10_rh values that Work
+```{r findValues}
+find_values <- function(core, betaValues, q10rhValues){
+  beta <- betaValues
+  q10_rh <- c()
+  for(val in betaValues){
+    setvar(core, NA, BETA(), val, "(unitless)")
+    q10_rh <- append(q10_rh, sensitivity_analysis(core, Q10_RH(), q10rhValues))
+  }
+  setvar(core, NA, BETA(), 0.36, "(unitless)")
+  return(data.frame(beta, q10_rh))
+}
+```
+
+#### Finding values for RCP 8.5 {.tabset}
+##### Beta Plot
+```{r betaPlot85}
+sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
+sensitivity_plot
+```
+
+##### q10_rh Plot
+```{r q10rhPlot85}
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+sensitivity_plot
+```
+
+#### Working Values
+```{r findingValues85}
+find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
+```
+
+#### Finding values for RCP 4.5 {.tabset}
+##### Beta Plot
+```{r betaPlot45}
+sensitivity_analysis(core45, BETA(), seq(0,2,0.05))
+sensitivity_plot
+```
+
+##### q10_rh Plot
+```{r q10rhPlot45}
+sensitivity_analysis(core45, Q10_RH(), seq(1,2,0.025))
+sensitivity_plot
+```
+
+#### Working Values
+```{r findingValues45}
+find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
+```
