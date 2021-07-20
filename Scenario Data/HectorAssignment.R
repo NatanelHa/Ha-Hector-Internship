@@ -397,102 +397,51 @@ run_with_param_range <- function(core, parameter, values) {
   Reduce(rbind, mapped)
 }
 
-#RCP 85
-#Sensitivity analysis for Beta
-sensitivity_beta <- run_with_param_range(core85, BETA(), seq(0.2, 20, 0.2))
-
-#Calculating Atmosphere Flux
-sensitivity_beta %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
-  sensitivity_beta
-
-#Plotting the range of different values 
-ggplot(sensitivity_beta) +
-  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
-  geom_line() +
-  ylab("Atmosphheric flux (Pg C/yr)")+
-  guides(color = guide_colorbar(title = expression(beta))) +
-  scale_color_viridis_c() 
-
-#Reseting Beta
-setvar(core85, NA, BETA(), 0.36, "(unitless)") 
-
-#Finding cutoff
-sensitivity_beta %>%
-  filter(year==2100, atmosphere_flux<=0.5)->
-  working_beta
+#Perform sensitivity analysis 
+sensitivity_analysis <- function(core, parameter, sequence){
+  #Get Old value
+  old_value <- fetchvars(core, NA, parameter)
+  unit <- as.character(old_value[["units"]])
   
-min(working_beta$parameter_value)->
-  min_beta
+  #Sensitivity 
+  sensitivity <- run_with_param_range(core, parameter, sequence)
+  
+  #Calculating Atmosphere Flux
+  sensitivity %>%
+    select(-units) %>%
+    pivot_wider(names_from = variable) %>%
+    mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+    select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
+    sensitivity
+  
+  #Create plot
+  sensitivity_plot <<- ggplot(sensitivity) +
+    aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
+    geom_line() +
+    ylab("Atmosphheric flux (Pg C/yr)")+
+    guides(color = guide_colorbar(title = parameter)) +
+    scale_color_viridis_c() 
+  
+  #Reset var
+  setvar(core, NA, parameter, first(old_value$value), unit) 
+  
+  #Finding cutoff
+  sensitivity %>%
+    filter(year==2100, atmosphere_flux<=0.5)->
+    working
+  
+  working %>%
+    mutate(distance = abs(parameter_value - first(old_value$value)))%>%
+    arrange(distance)->
+    working
+  
+  return(first(working$parameter_value))
+}
 
-min_beta
+sensitivity_analysis(core45, BETA(), seq(0,1,0.05))
+sensitivity_plot
 
-#Sensitivity for q10rh
-sensitivity_q10rh <- run_with_param_range(core85, Q10_RH(), seq(0.05, 2, 0.05))
-
-#Calculating Atmosphere Flux
-sensitivity_q10rh %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
-  sensitivity_q10rh
-
-#Plotting the range of different values 
-ggplot(sensitivity_q10rh) +
-  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
-  geom_line() +
-  ylab("Atmosphheric flux (Pg C/yr)")+
-  guides(color = guide_colorbar(title = "Q10_RH")) +
-  scale_color_viridis_c()
-
-#Resetting q10rh
-setvar(core85, NA, Q10_RH(), 2, "(unitless)")
-
-#Finding cutoff
-sensitivity_q10rh %>%
-  filter(year==2100, atmosphere_flux<=0.5)->
-  working_q10_rh
-
-max(working_q10_rh$parameter_value)->
-  max_q10rh
-
-max_q10rh
-
-setvar(core85, NA, BETA(), 18, "(unitless)") 
-sensitivity_q10rh <- run_with_param_range(core85, Q10_RH(), seq(0.05, 2, 0.05))
-
-sensitivity_q10rh %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
-  sensitivity_q10rh
-
-#Plotting the range of different values 
-ggplot(sensitivity_q10rh) +
-  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
-  geom_line() +
-  ylab("Atmosphheric flux (Pg C/yr)")+
-  guides(color = guide_colorbar(title = "Q10_RH")) +
-  scale_color_viridis_c()
-
-#Resetting q10rh
-setvar(core85, NA, Q10_RH(), 2, "(unitless)")
-
-#Finding cutoff
-sensitivity_q10rh %>%
-  filter(year==2100, atmosphere_flux<=0.5)->
-  working_q10_rh
-
-max(working_q10_rh$parameter_value)->
-  max_q10rh
-
-max_q10rh
-
+#RCP 8.5
 ##Pairs that I found work
 #beta: 14 and q10_rh: 0.1
 #beta: 15 and q10_rh: 0.3
@@ -502,102 +451,6 @@ max_q10rh
 #beta: 18.8 and q10_rh: 2
 
 #RCP 4.5
-#Sensitivity analysis for Beta
-sensitivity_beta <- run_with_param_range(core45, BETA(), seq(0.36, 2, 0.04))
-
-#Calculating Atmosphere Flux
-sensitivity_beta %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
-  sensitivity_beta
-
-#Plotting the range of different values 
-ggplot(sensitivity_beta) +
-  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
-  geom_line() +
-  ylab("Atmosphheric flux (Pg C/yr)")+
-  guides(color = guide_colorbar(title = expression(beta))) +
-  scale_color_viridis_c() 
-
-#Reseting Beta
-setvar(core45, NA, BETA(), 0.36, "(unitless)") 
-
-#Finding cutoff
-sensitivity_beta %>%
-  filter(year==2100, atmosphere_flux<=0.5)->
-  working_beta
-
-min(working_beta$parameter_value)->
-  min_beta
-
-min_beta
-
-#Sensitivity for q10rh
-sensitivity_q10rh <- run_with_param_range(core45, Q10_RH(), seq(0.05, 2, 0.05))
-
-#Calculating Atmosphere Flux
-sensitivity_q10rh %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
-  sensitivity_q10rh
-
-#Plotting the range of different values 
-ggplot(sensitivity_q10rh) +
-  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
-  geom_line() +
-  ylab("Atmosphheric flux (Pg C/yr)")+
-  guides(color = guide_colorbar(title = "Q10_RH")) +
-  scale_color_viridis_c()
-
-#Resetting q10rh
-setvar(core45, NA, Q10_RH(), 2, "(unitless)")
-
-#Finding cutoff
-sensitivity_q10rh %>%
-  filter(year==2100, atmosphere_flux<=0.5)->
-  working_q10_rh
-
-max(working_q10_rh$parameter_value)->
-  max_q10rh
-
-max_q10rh
-
-setvar(core45, NA, BETA(), 0.52, "(unitless)") 
-
-sensitivity_q10rh <- run_with_param_range(core45, Q10_RH(), seq(1.8, 2, 0.005))
-
-sensitivity_q10rh %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions,-atm_ocean_flux,-atm_land_flux) ->
-  sensitivity_q10rh
-
-#Plotting the range of different values 
-ggplot(sensitivity_q10rh) +
-  aes(x = year, y = atmosphere_flux, color = parameter_value, group = parameter_value) +
-  geom_line() +
-  ylab("Atmosphheric flux (Pg C/yr)")+
-  guides(color = guide_colorbar(title = "Q10_RH")) +
-  scale_color_viridis_c()
-
-#Resetting q10rh
-setvar(core85, NA, Q10_RH(), 2, "(unitless)")
-
-#Finding cutoff
-sensitivity_q10rh %>%
-  filter(year==2100, atmosphere_flux<=0.5)->
-  working_q10_rh
-
-max(working_q10_rh$parameter_value)->
-  max_q10rh
-
-max_q10rh
-
 #Pairs that I found work
 #beta: 0.36 and q10_rh: 1.835
 #beta: 0.40 and q10_rh: 1.880
