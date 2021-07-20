@@ -434,24 +434,66 @@ sensitivity_analysis <- function(core, parameter, sequence){
     mutate(distance = abs(parameter_value - first(old_value$value)))%>%
     arrange(distance)->
     working
-  
   return(first(working$parameter_value))
 }
 
-sensitivity_analysis(core45, BETA(), seq(0,1,0.05))
+#RCP 8.5
+sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
 sensitivity_plot
 
-#RCP 8.5
+setvar(core85, NA, BETA(), 14, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 15, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 16, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 17, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 18, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 19, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 0.36, "(unitless)")
+
 ##Pairs that I found work
-#beta: 14 and q10_rh: 0.1
+#beta: 14 and q10_rh: 0.05
 #beta: 15 and q10_rh: 0.3
 #beta: 16 and q10_rh: 0.75
 #beta: 17 and q10_rh: 1.2
 #beta: 18 and q10_rh: 1.65
-#beta: 18.8 and q10_rh: 2
+#beta: 19 and q10_rh: 2
 
 #RCP 4.5
 #Pairs that I found work
+sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
+sensitivity_plot
+
+setvar(core85, NA, BETA(), 0.36, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 0.4, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 0.44, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 0.48, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 0.52, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 0.56, "(unitless)")
+sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
+
+setvar(core85, NA, BETA(), 0.36, "(unitless)")
+
 #beta: 0.36 and q10_rh: 1.835
 #beta: 0.40 and q10_rh: 1.880
 #beta: 0.44 and q10_rh: 1.925
