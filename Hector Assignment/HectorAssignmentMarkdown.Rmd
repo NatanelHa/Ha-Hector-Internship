@@ -623,6 +623,7 @@ that allow for an atmospheric flux below 0.5 Pg C/yr in 2100 in RCP 8.5
 sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
 sensitivity_plot
 ```
+
 The sensitivity analysis returns the value of Beta closest to the original 
 that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when q10_rh is left at 2. 
 In this case it is 19. 
@@ -632,6 +633,7 @@ In this case it is 19.
 sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
 sensitivity_plot
 ```
+
 The sensitivity analysis returns the value of q10_rh closest to the original 
 that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when beta is left at 0.36. 
 In this case it is NA, because no value of q10_rh would create that low of a flux when
@@ -666,6 +668,7 @@ that allow for an atmospheric flux below 0.5 Pg C/yr in 2100 in RCP 4.5
 sensitivity_analysis(core45, BETA(), seq(0,2,0.05))
 sensitivity_plot
 ```
+
 The sensitivity analysis returns the value of Beta closest to the original 
 that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when q10_rh is left at 2. 
 In this case it is 0.55. 
@@ -675,6 +678,7 @@ In this case it is 0.55.
 sensitivity_analysis(core45, Q10_RH(), seq(1,2,0.025))
 sensitivity_plot
 ```
+
 The sensitivity analysis returns the value of q10_rh closest to the original 
 that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when beta is left at 0.36. 
 In this case it is 1.825. 
@@ -703,3 +707,5 @@ shutdown(core45)
 ```{r sessionInfo, echo=FALSE}
 sessionInfo()
 ```
+
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
