@@ -5,21 +5,22 @@ date: "7/19/2021"
 output: 
   html_document:
     toc: true
+    toc_depth: 3
     toc_float: 
      collapsed: false
      smooth_scroll: true
     theme: paper 
 ---
 
-#### Importing Libraries 
-```{r importing, message=FALSE, warning=FALSE}
+```{r importing, message=FALSE, warning=FALSE, include=FALSE}
+# Importing Libraries 
 library(hector)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 ```
 
-### Running RCP 8.5
+## 1. RCP 8.5 Carbon Pools
 
 #### Creating Core
 ```{r core85, message=FALSE, warning=FALSE}
@@ -112,13 +113,15 @@ splitBarPlot85 <- ggplot(resultsCentury85)+
 splitBarPlot85
 ```
 
-#### Looking At Fluxes
+## 2. RCP 8.5 Net Fluxes
+
+#### Getting Results for Net Fluxes
 ```{r fluxes85, message=FALSE, warning=FALSE}
 result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
 results85flux <- fetchvars(core85, 2000:2100, result_vars, scenario = "RCP 8.5")
 ```
 
-#### Calculating atmosphere flux
+#### Calculating Atmosphere Flux
 ```{r atmosphereFlux85, message=FALSE, warning=FALSE}
 results85flux %>%
   select(-units) %>%
@@ -179,7 +182,9 @@ fluxBar85 <- ggplot(results85fluxCentury)+
 fluxBar85
 ```
 
-### Running RCP 4.5
+## 3. Comparing RCP 8.5 to RCP 4.5
+
+### RCP 4.5 Carpon Pools
 
 #### Creating Core
 ```{r core45, message=FALSE, warning=FALSE}
@@ -272,7 +277,9 @@ splitBarPlot45 <- ggplot(resultsCentury45)+
 splitBarPlot45
 ```
 
-#### Looking At Fluxes
+### RCP 4.5 Net Fluxes 
+
+#### Getting Results for Net Fluxes
 ```{r fluxes45, message=FALSE, warning=FALSE}
 result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
 results45flux <- fetchvars(core45, 2000:2100, result_vars, scenario = "RCP 4.5")
@@ -339,7 +346,7 @@ fluxBar45 <- ggplot(results45fluxCentury)+
 fluxBar45
 ```
 
-### Comparing the two RCPs
+### Comparing the two RCPs 
 
 #### Combining the two Datasets
 ```{r combining}
@@ -474,7 +481,7 @@ fluxBarCompare <- ggplot(resultsFluxCentury)+
 fluxBarCompare
 ```
 
-### Net Atmosphere flux below 0.5 Pg C/yr in 2100
+## 4. Altering Parameters 
 Changing beta and q10_RH to get the Atmospheric flux to be below 0.5 Pg C/yr
 
 #### Finding out what the current values of beta and Q10_RH
@@ -482,11 +489,6 @@ Changing beta and q10_RH to get the Atmospheric flux to be below 0.5 Pg C/yr
 beta <- fetchvars(core85, NA, BETA())
 beta 
 q10rh <- fetchvars(core85, NA, Q10_RH())
-q10rh 
-
-beta <- fetchvars(core45, NA, BETA())
-beta 
-q10rh <- fetchvars(core45, NA, Q10_RH())
 q10rh 
 ```
 
@@ -572,7 +574,9 @@ find_values <- function(core, betaValues, q10rhValues){
 }
 ```
 
-#### Finding values for RCP 8.5 {.tabset}
+### Finding values for RCP 8.5
+
+#### Sensitivity Plots {.tabset}
 ##### Beta Plot
 ```{r betaPlot85}
 sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
@@ -589,7 +593,7 @@ sensitivity_plot
 ```{r findingValues85, eval=FALSE, results='hide'}
 find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 ```
-
+Table of Working Values:
 ```{r findingValues85table, echo=FALSE, message=FALSE, warning=FALSE}
 library(kableExtra)
 library(knitr)
@@ -601,8 +605,9 @@ as.data.frame(t(find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05)))) %>%
 ```
 
 
+### Finding values for RCP 4.5
 
-#### Finding values for RCP 4.5 {.tabset}
+#### Sensitivity Plots {.tabset}
 ##### Beta Plot
 ```{r betaPlot45}
 sensitivity_analysis(core45, BETA(), seq(0,2,0.05))
@@ -619,13 +624,14 @@ sensitivity_plot
 ```{r findingValues45, eval=FALSE, results='hide'}
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
 ```
-
+Table of Working Values:
 ```{r findingValues45table, echo=FALSE, message=FALSE, warning=FALSE}
 as.data.frame(t(find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01)))) %>% 
   kable(col.names = NULL) %>%  
   kable_styling(bootstrap_options = "striped", full_width = F, 
                 position = "left")
 ```
+
 #### Shutting Down Cores
 ```{r shutdown, results='hide'}
 shutdown(core85)
