@@ -184,6 +184,10 @@ fluxBar85
 
 ## 3. Comparing RCP 8.5 to RCP 4.5
 
+First, I repeated the same analysis and created the same 
+plots for RCP 4.5 that I did for RCP 8.5, in order to see 
+how the results varied. 
+
 ### RCP 4.5 Carpon Pools
 
 #### Creating Core
@@ -348,6 +352,10 @@ fluxBar45
 
 ### Comparing the two RCPs 
 
+Second, I plotted the two RCPs on top of each other by combining
+the datasets into one larger dataset. In each case I distinguished
+between the two RCPs with color or linetype. 
+
 #### Combining the two Datasets
 ```{r combining}
 resultsC <- rbind(results85, results45)
@@ -485,6 +493,10 @@ fluxBarCompare
 Changing beta and q10_RH to get the Atmospheric flux to be below 0.5 Pg C/yr
 
 #### Finding out what the current values of beta and Q10_RH
+
+To start out this task, I first found the default values for BETA()
+and Q10_RH() in Hector. These values were the same for both RCPs.
+
 ```{r currentValues}
 beta <- fetchvars(core85, NA, BETA())
 beta 
@@ -492,8 +504,19 @@ q10rh <- fetchvars(core85, NA, Q10_RH())
 q10rh 
 ```
 
-#### Sensitivity Analysis Functions
+### Sensitivity Analysis Functions
+
+In order to have a more precise method besides brute forcing it, I modified and
+added to the sensitivity analysis Vignette in the Hector Manual. 
+
+Credits to: https://jgcri.github.io/hector/articles/intro-to-hector.html#sensitivity-analysis 
+
+A tour of the Hector R interface,
+By Alexey Shiklomanov: 
+2018-10-17
+
 ##### Function to run Hector with a certain parameter change 
+This function runs a Hector core with a certain change in a specified parameter 
 ```{r param}
 run_with_param <- function(core, parameter, value) {
   old_value <- fetchvars(core, NA, parameter)
@@ -501,6 +524,9 @@ run_with_param <- function(core, parameter, value) {
   setvar(core, NA, parameter, value, unit)
   reset(core)
   run(core)
+  
+  #Modified the results vars and years from Vignette
+  #In order to look at the Atmospheric flux
   result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
   result <- fetchvars(core, 2000:2100, result_vars)
   result[["parameter_value"]] <- value
@@ -509,6 +535,8 @@ run_with_param <- function(core, parameter, value) {
 ```
 
 #### Function to Run Hector with a range of parameter values
+This function uses the previous function to run a range of values for a specified
+parameter and maps them to each other 
 ```{r paramRange}
 run_with_param_range <- function(core, parameter, values) {
   mapped <- Map(function(x) run_with_param(core, parameter, x), values)
@@ -516,7 +544,13 @@ run_with_param_range <- function(core, parameter, values) {
 }
 ```
 
-#### Function to Perform Sensitivity Analysis 
+#### Function to Perform Sensitivity Analysis
+This function performs the sensitivity analysis, creates a sensitivity plot, and returns
+the cutoff for the closest the varaible can be to the original value while still
+having the Atmospheric flux below 0.5 Pg C/yr in 2100. 
+
+This plot is a modified version from the hector Vignette, and the rest was added
+by myself. I created this function to repeat this process several times. 
 ```{r sensitivity}
 sensitivity_analysis <- function(core, parameter, sequence){
   #Get Old value
@@ -561,6 +595,10 @@ sensitivity_analysis <- function(core, parameter, sequence){
 ```
 
 #### Function to Find Specific beta and q10_rh values that Work
+This function takes a range of betaValues, and for each of those betaValues
+it finds the q10_rh needed to have the atmospheric flux below 0.5 Pg C/yr in 2100. 
+It choses the q10_rh closest to the original q10_rh value, by utilizing the above 
+sensitivity analysis function. 
 ```{r findValues}
 find_values <- function(core, betaValues, q10rhValues){
   beta <- betaValues
@@ -576,20 +614,32 @@ find_values <- function(core, betaValues, q10rhValues){
 
 ### Finding values for RCP 8.5
 
+Using the above functions, I was able to find values of beta and q10_rh
+that allow for an atmospheric flux below 0.5 Pg C/yr in 2100 in RCP 8.5
+
 #### Sensitivity Plots {.tabset}
 ##### Beta Plot
 ```{r betaPlot85}
 sensitivity_analysis(core85, BETA(), seq(0,20,0.5))
 sensitivity_plot
 ```
+The sensitivity analysis returns the value of Beta closest to the original 
+that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when q10_rh is left at 2. 
+In this case it is 19. 
 
 ##### q10_rh Plot
 ```{r q10rhPlot85}
 sensitivity_analysis(core85, Q10_RH(), seq(0.05,2,0.05))
 sensitivity_plot
 ```
+The sensitivity analysis returns the value of q10_rh closest to the original 
+that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when beta is left at 0.36. 
+In this case it is NA, because no value of q10_rh would create that low of a flux when
+beta is left at 0.36. 
 
 #### Working Values
+Finding pairs of values that work, meaning that they would create a value of 
+0.5 Pg C/yr or less for the atmospheric flux in 2100. 
 ```{r findingValues85, eval=FALSE, results='hide'}
 find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 ```
@@ -607,20 +657,31 @@ as.data.frame(t(find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05)))) %>%
 
 ### Finding values for RCP 4.5
 
+Using the above functions, I was able to find values of beta and q10_rh
+that allow for an atmospheric flux below 0.5 Pg C/yr in 2100 in RCP 4.5
+
 #### Sensitivity Plots {.tabset}
 ##### Beta Plot
 ```{r betaPlot45}
 sensitivity_analysis(core45, BETA(), seq(0,2,0.05))
 sensitivity_plot
 ```
+The sensitivity analysis returns the value of Beta closest to the original 
+that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when q10_rh is left at 2. 
+In this case it is 0.55. 
 
 ##### q10_rh Plot
 ```{r q10rhPlot45}
 sensitivity_analysis(core45, Q10_RH(), seq(1,2,0.025))
 sensitivity_plot
 ```
+The sensitivity analysis returns the value of q10_rh closest to the original 
+that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when beta is left at 0.36. 
+In this case it is 1.825. 
 
 #### Working Values
+Finding pairs of values that work, meaning that they would create a value of 
+0.5 Pg C/yr or less for the atmospheric flux in 2100. 
 ```{r findingValues45, eval=FALSE, results='hide'}
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
 ```
