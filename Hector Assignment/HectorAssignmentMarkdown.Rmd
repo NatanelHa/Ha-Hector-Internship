@@ -15,7 +15,7 @@ output:
 This assignment refers to this github issue:
 https://github.com/NatanelHa/Ha-Hector-Internship/issues/3 
 
-The purpose is to get more familiar with working with the Hector simple cliamte model. 
+The purpose is to get more familiar with working with the Hector simple climate model. 
 
 ##### Importing Libraries 
 ```{r importing, message=FALSE, warning=FALSE}
@@ -27,7 +27,7 @@ library(tidyr)
 
 ## 1. RCP 8.5 Carbon Pools
 
-Investigating how much carbon is in each pool in the hector model in 2100 
+Investigating how much carbon is in each pool in the Hector model in 2100 
 compared to how much was in them in present day (I used from 2000 to 2100). 
 
 First, I had to create and run a core based on RCP 8.5
@@ -43,7 +43,7 @@ core85 <- newcore(rcp85, suppresslogging  = TRUE)
 run(core85)
 ```
 
-Then, I retrieved results from the carbon pools. 
+Then, I retrieved results from the carbon pools, and plotted them. 
 
 #### Getting Results for Carbon Pools
 ```{r results85, message=FALSE, warning=FALSE}
@@ -521,8 +521,9 @@ q10rh
 
 ### Sensitivity Analysis Functions
 
-In order to have a more precise method besides brute forcing it, I modified and
-added to the sensitivity analysis Vignette in the Hector Manual. 
+In order to find values of beta and q10_rh that would work, I modified and
+added to the sensitivity analysis Vignette in the Hector Manual. This allowed
+me to test and compile a range of different values of the two parameters. 
 
 Credits to: https://jgcri.github.io/hector/articles/intro-to-hector.html#sensitivity-analysis 
 
@@ -550,8 +551,8 @@ run_with_param <- function(core, parameter, value) {
 ```
 
 #### Function to Run Hector with a range of parameter values
-This function uses the previous function to run a range of values for a specified
-parameter and maps them to each other 
+This function runs a range of values for a specified
+parameter, using the previous function to run the model. 
 ```{r paramRange}
 run_with_param_range <- function(core, parameter, values) {
   mapped <- Map(function(x) run_with_param(core, parameter, x), values)
@@ -561,11 +562,12 @@ run_with_param_range <- function(core, parameter, values) {
 
 #### Function to Perform Sensitivity Analysis
 This function performs the sensitivity analysis, creates a sensitivity plot, and returns
-the cutoff for the closest the varaible can be to the original value while still
+the cutoff for the closest the variable can be to the original value while still
 having the Atmospheric flux below 0.5 Pg C/yr in 2100. 
 
-This plot is a modified version from the hector Vignette, and the rest was added
-by myself. I created this function to repeat this process several times. 
+This plot is a modified version from the Hector Vignette, and the rest was added
+by myself. I put it in a function because it allowed me to run it repeatedly for different
+RCPs and ranges of values. 
 ```{r sensitivity}
 sensitivity_analysis <- function(core, parameter, sequence){
   #Get Old value
@@ -612,7 +614,7 @@ sensitivity_analysis <- function(core, parameter, sequence){
 #### Function to Find Specific beta and q10_rh values that Work
 This function takes a range of betaValues, and for each of those betaValues
 it finds the q10_rh needed to have the atmospheric flux below 0.5 Pg C/yr in 2100. 
-It choses the q10_rh closest to the original q10_rh value, by utilizing the above 
+It chooses the q10_rh closest to the original q10_rh value, by utilizing the above 
 sensitivity analysis function. 
 ```{r findValues}
 find_values <- function(core, betaValues, q10rhValues){
@@ -651,7 +653,7 @@ sensitivity_plot
 
 The sensitivity analysis returns the value of q10_rh closest to the original 
 that allows for below 0.5 Pg C/yr atmospheric flux in 2100, when beta is left at 0.36. 
-In this case it is NA, because no value of q10_rh would create that low of a flux when
+In this case it is NA, because no value of q10_rh would create a flux below 0.5 Pg C/yr when
 beta is left at 0.36. 
 
 #### Working Values
