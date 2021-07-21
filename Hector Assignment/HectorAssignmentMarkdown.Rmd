@@ -7,7 +7,7 @@ output:
     toc: true
     toc_float: 
      collapsed: false
-     smooth_scroll: false
+     smooth_scroll: true
     theme: paper 
 ---
 
@@ -126,7 +126,7 @@ results85flux %>%
   mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
   select(-ffi_emissions) %>%
   pivot_longer(3:5, names_to = "variable")->
-  results85flux
+results85flux
 ```  
 
 #### Plotting Fluxes {.tabset}
@@ -590,10 +590,12 @@ sensitivity_plot
 find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 ```
 
-```{r findingValues85table, echo=FALSE}
+```{r findingValues85table, echo=FALSE, message=FALSE, warning=FALSE}
 library(kableExtra)
-find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05)) %>%
-  kbl %>%
+library(knitr)
+
+as.data.frame(t(find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05)))) %>% 
+  kable(col.names = NULL) %>%  
   kable_styling(bootstrap_options = "striped", full_width = F, 
                 position = "left")
 ```
@@ -618,9 +620,9 @@ sensitivity_plot
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
 ```
 
-```{r findingValues45table, echo=FALSE}
-find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01)) %>%
-  kbl %>%
+```{r findingValues45table, echo=FALSE, message=FALSE, warning=FALSE}
+as.data.frame(t(find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01)))) %>% 
+  kable(col.names = NULL) %>%  
   kable_styling(bootstrap_options = "striped", full_width = F, 
                 position = "left")
 ```
@@ -634,4 +636,3 @@ shutdown(core45)
 ```{r sessionInfo, echo=FALSE}
 sessionInfo()
 ```
-
