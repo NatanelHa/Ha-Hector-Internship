@@ -12,8 +12,13 @@ output:
     theme: paper 
 ---
 
-```{r importing, message=FALSE, warning=FALSE, include=FALSE}
-# Importing Libraries 
+This assignment refers to this github issue:
+https://github.com/NatanelHa/Ha-Hector-Internship/issues/3 
+
+The purpose is to get more familiar with working with the Hector simple cliamte model. 
+
+##### Importing Libraries 
+```{r importing, message=FALSE, warning=FALSE}
 library(hector)
 library(ggplot2)
 library(dplyr)
@@ -21,6 +26,11 @@ library(tidyr)
 ```
 
 ## 1. RCP 8.5 Carbon Pools
+
+Investigating how much carbon is in each pool in the hector model in 2100 
+compared to how much was in them in present day (I used from 2000 to 2100). 
+
+First, I had to create and run a core based on RCP 8.5
 
 #### Creating Core
 ```{r core85, message=FALSE, warning=FALSE}
@@ -32,6 +42,8 @@ core85 <- newcore(rcp85, suppresslogging  = TRUE)
 ```{r run85, message=FALSE, warning=FALSE, results='hide'}
 run(core85)
 ```
+
+Then, I retrieved results from the carbon pools. 
 
 #### Getting Results for Carbon Pools
 ```{r results85, message=FALSE, warning=FALSE}
@@ -114,6 +126,9 @@ splitBarPlot85
 ```
 
 ## 2. RCP 8.5 Net Fluxes
+
+Investigating how the rate of change of carbon (aka the fluxes) in each pool
+in Hector is different between 2100 and present day (from 2000 to 2100)
 
 #### Getting Results for Net Fluxes
 ```{r fluxes85, message=FALSE, warning=FALSE}
