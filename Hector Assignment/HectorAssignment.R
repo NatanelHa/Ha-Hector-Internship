@@ -1,4 +1,3 @@
-#Importing Libraries 
 library(hector)
 library(ggplot2)
 library(dplyr)
@@ -114,7 +113,7 @@ results85flux %>%
 fluxBar85 <- ggplot(results85fluxCentury)+
   aes(x = as.character(year), y = value)+
   geom_bar(stat = "identity")+
-  facet_wrap(~variable, scales = "free_y",
+  facet_wrap(~variable,
              labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
                                               "atm_ocean_flux" = "Ocean Net Flux",
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+
@@ -242,7 +241,7 @@ results45flux %>%
 fluxBar45 <- ggplot(results45fluxCentury)+
   aes(x = as.character(year), y = value)+
   geom_bar(stat = "identity")+
-  facet_wrap(~variable, scales = "free_y",
+  facet_wrap(~variable, 
              labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
                                               "atm_ocean_flux" = "Ocean Net Flux",
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+
@@ -353,7 +352,7 @@ resultsFlux %>%
 fluxBarCompare <- ggplot(resultsfluxCentury)+
   aes(x = as.character(year), y = value, fill = scenario)+
   geom_bar(stat = "identity", position = "dodge")+
-  facet_wrap(~variable, scales = "free_y",
+  facet_wrap(~variable, 
              labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
                                               "atm_ocean_flux" = "Ocean Net Flux",
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+

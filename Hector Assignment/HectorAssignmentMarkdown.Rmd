@@ -125,6 +125,19 @@ splitBarPlot85 <- ggplot(resultsCentury85)+
 splitBarPlot85
 ```
 
+#### Analysis 
+
+From the line graph, it is evident that the ocean pool does not increase or decrease
+in its amount of carbon from present day to 2100. Every other pool appears to have a 
+similar positive increasing slope of increasing carbon from 2000 to 2100. 
+
+From the area and bar graph, the relative sizes of the pools become more clear. 
+The Ocean pool is the largest pool by far. The detritus pool is relatively a lot smaller so
+its essentially not visible in the area and bar graph. 
+
+From the bar graph and the faceted bar graph, it is evident that the the atmospheric
+pool seems to have undergone the largest relative increase. 
+
 ## 2. RCP 8.5 Net Fluxes
 
 Investigating how the rate of change of carbon (aka the fluxes) in each pool
@@ -187,7 +200,7 @@ results85flux %>%
 fluxBar85 <- ggplot(results85fluxCentury)+
   aes(x = as.character(year), y = value)+
   geom_bar(stat = "identity")+
-  facet_wrap(~variable, scales = "free_y",
+  facet_wrap(~variable,
              labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
                                               "atm_ocean_flux" = "Ocean Net Flux",
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+
@@ -196,6 +209,16 @@ fluxBar85 <- ggplot(results85fluxCentury)+
   theme_bw()
 fluxBar85
 ```
+
+#### Analysis
+
+From the line graphs, we can see that all three fluxes have a largely positive slope. 
+This means that the rate at which each pool increases in carbon is overall increasing. 
+In the land pool, there is a slight dip at the end, meaning that the flux started 
+to decrease towards the end of the century. 
+
+From the bar graph, we can see the relative sizes of the fluxes. This shows
+that the atmospheric flux is the largest, followed by the ocean flux, followed by land.
 
 ## 3. Comparing RCP 8.5 to RCP 4.5
 
@@ -296,6 +319,16 @@ splitBarPlot45 <- ggplot(resultsCentury45)+
 splitBarPlot45
 ```
 
+#### Analysis 
+
+Similar to RCP 8.5, we can see from the plots that each carbon pool increases, except
+for the ocean pool which stays constant. We can also see that the ocean pool is the largest
+and the detritus pool is the smallest. Similarly the atmospheric pool went through the largest
+relative increase. 
+
+However, the differ in that the line graphs show that the carbon levels start to level
+out slighly by the end of the century. 
+
 ### RCP 4.5 Net Fluxes 
 
 #### Getting Results for Net Fluxes
@@ -355,7 +388,7 @@ results45flux %>%
 fluxBar45 <- ggplot(results45fluxCentury)+
   aes(x = as.character(year), y = value)+
   geom_bar(stat = "identity")+
-  facet_wrap(~variable, scales = "free_y",
+  facet_wrap(~variable, 
              labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
                                               "atm_ocean_flux" = "Ocean Net Flux",
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+
@@ -365,11 +398,22 @@ fluxBar45 <- ggplot(results45fluxCentury)+
 fluxBar45
 ```
 
+#### Analysis 
+
+From the plots, we can see that the fluxes differ from the fluxes of RCP 8.5, in
+that they all start of increasing, but around halfway through the century the fluxes
+start to decrease. The atmospheric flux also sharply changes path and starts to increase
+towards the end of the century.
+
+From the bar chart, we can see that the ocean flux overall increased from start to end 
+of the century, but the land and atmospheric pool are lower at the end of the century than
+they started. 
+
 ### Comparing the two RCPs 
 
 Second, I plotted the two RCPs on top of each other by combining
 the datasets into one larger dataset. In each case I distinguished
-between the two RCPs with color or linetype. 
+between the two RCPs with color or line type. 
 
 #### Combining the two Datasets
 ```{r combining}
@@ -438,7 +482,7 @@ resultsC %>%
   filter(year %% 100 == 0)->
   resultsCenturyCompare
 
-#PLotting
+#Plotting
 splitBarPlotCompare <- ggplot(resultsCenturyCompare)+
   aes(x = as.character(year), y = value, fill = scenario)+
   geom_bar(stat = "identity", position = "dodge")+
@@ -453,6 +497,14 @@ splitBarPlotCompare <- ggplot(resultsCenturyCompare)+
   theme_bw()
 splitBarPlotCompare
 ```
+
+#### Analysis 
+
+Comparing the two RCPs directly on top of each other, makes it more clear that the 
+carbon pools went through a larger increase in RCP 8.5 than in RCP 4.5. It also more
+clearly shows in the line graph how RCP 8.5 continues to increase while RCP 4.5 starts
+to level off. Also, you can see that even though the two RCPs ocean pools stay constant, 
+the ocean pool in RCP 8.5 has a larger pool of carbon than RCP 4.5
 
 #### Plotting Fluxes {.tabset}
 ##### Line Graph 
@@ -494,7 +546,7 @@ resultsFlux %>%
 fluxBarCompare <- ggplot(resultsFluxCentury)+
   aes(x = as.character(year), y = value, fill = scenario)+
   geom_bar(stat = "identity", position = "dodge")+
-  facet_wrap(~variable, scales = "free_y",
+  facet_wrap(~variable,
              labeller = labeller(variable = c("atm_land_flux" = "Land Net Flux",
                                               "atm_ocean_flux" = "Ocean Net Flux",
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+
@@ -503,6 +555,14 @@ fluxBarCompare <- ggplot(resultsFluxCentury)+
   xlab("Year")
 fluxBarCompare
 ```
+#### Analysis 
+
+By comparing the two RCPs on top of each other, we can see that for the large part
+the fluxes in RCP 8.5 were always larger than RCP 4.5. The one exception is that 
+towards the start of the century, the land flux was larger in RCP 4.5. 
+
+We can also see how while in RCP 8.5, the fluxes increased while the fluxes 
+in RCP 4.5 decreased in the second half of the century. 
 
 ## 4. Altering Parameters 
 Changing beta and q10_RH to get the Atmospheric flux to be below 0.5 Pg C/yr
@@ -662,7 +722,7 @@ Finding pairs of values that work, meaning that they would create a value of
 ```{r findingValues85, eval=FALSE, results='hide'}
 find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05))
 ```
-Table of Working Values:
+Table of Pairs of Working Values:
 ```{r findingValues85table, echo=FALSE, message=FALSE, warning=FALSE}
 library(kableExtra)
 library(knitr)
@@ -673,6 +733,12 @@ as.data.frame(t(find_values(core85, seq(14,19,0.5), seq(0.05,2,0.05)))) %>%
                 position = "left")
 ```
 
+#### Analysis
+
+From the working values, we can see that beta would need to be over 14 in order for
+the atmosphere to be below 0.5 Pg C/yr. This is a very drastic change from its original
+value of 0.36. Therefore, I would infer it is not likely for the atmospheric flux to be
+below 0.5 Pg C/yr in 2100 based on RCP 8.5. 
 
 ### Finding values for RCP 4.5
 
@@ -706,13 +772,19 @@ Finding pairs of values that work, meaning that they would create a value of
 ```{r findingValues45, eval=FALSE, results='hide'}
 find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
 ```
-Table of Working Values:
+Table of Pairs of Working Values:
 ```{r findingValues45table, echo=FALSE, message=FALSE, warning=FALSE}
 as.data.frame(t(find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01)))) %>% 
   kable(col.names = NULL) %>%  
   kable_styling(bootstrap_options = "striped", full_width = F, 
                 position = "left")
 ```
+
+#### Analysis 
+
+All of the working values appear to be somewhat close to the original values, because
+there are all within 0.5 of each other. I would say it would be plausible then
+for atmospheric flux to be below 0.5 Pg C/yr in 2100 based on RCP 4.5.
 
 #### Shutting Down Cores
 ```{r shutdown, results='hide'}
