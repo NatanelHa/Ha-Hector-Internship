@@ -401,7 +401,7 @@ fluxBar45
 #### Analysis 
 
 From the plots, we can see that the fluxes differ from the fluxes of RCP 8.5, in
-that they all start of increasing, but around halfway through the century the fluxes
+that they all start off increasing, but around halfway through the century the fluxes
 start to decrease. The atmospheric flux also sharply changes path and starts to increase
 towards the end of the century.
 
@@ -555,6 +555,7 @@ fluxBarCompare <- ggplot(resultsFluxCentury)+
   xlab("Year")
 fluxBarCompare
 ```
+
 #### Analysis 
 
 By comparing the two RCPs on top of each other, we can see that for the large part
