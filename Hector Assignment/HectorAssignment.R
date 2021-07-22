@@ -433,6 +433,7 @@ sensitivity_analysis <- function(core, parameter, sequence){
     mutate(distance = abs(parameter_value - first(old_value$value)))%>%
     arrange(distance)->
     working
+  
   return(first(working$parameter_value))
 }
 
@@ -468,3 +469,23 @@ find_values(core45, seq(0.36,0.54,0.02), seq(1.75,2,0.01))
 #Shutting down Cores
 shutdown(core85)
 shutdown(core45)
+
+###Extra Experimentation
+#RCP 6.0
+#Creating rcp60 Core
+rcp60 <- system.file("input", "hector_rcp60.ini", package = "hector")
+core60 <- newcore(rcp60, suppresslogging  = TRUE)
+
+#Run Core
+run(core60)
+
+sensitivity_analysis(core60, BETA(), seq(0,10,0.5))
+sensitivity_plot
+
+sensitivity_analysis(core60, Q10_RH(), seq(0.05,2,0.05))
+sensitivity_plot
+
+find_values(core60, seq(4,6,0.2), seq(0.05,2,0.05))
+
+
+
