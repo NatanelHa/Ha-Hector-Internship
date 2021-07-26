@@ -1,6 +1,3 @@
-#Install Local Hector
-#devtools::install("/Users/Natanel Ha/Documents/GitHub/hector")
-
 #Importing Libraries
 library(hector)
 library(ggplot2)
@@ -9,7 +6,7 @@ library(tidyr)
 
 ## Basic Run
 #Configuring INI File
-ini_file <- system.file("input/hector_rcp45.ini", package = "hector") 
+ini_file <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/InputTesting/myInput.ini"
 
 #Initialize a Hector Instance
 core <- newcore(ini_file)
@@ -19,7 +16,7 @@ core
 run(core) 
 
 #Retrieve Results
-results <- fetchvars(core, 2000:2300)
+results <- fetchvars(core, 2000:2500)
 head(results) 
 
 
@@ -36,7 +33,7 @@ ggplot(results) +
 
 #Getting Results
 result_vars <- c(ATMOSPHERIC_C(), SOIL_C(), VEG_C(), DETRITUS_C(), OCEAN_C())
-results <- fetchvars(core, 2000:2300, result_vars, scenario = "RCP 4.5")
+results <- fetchvars(core, 2000:2100, result_vars, scenario = "RCP 4.5")
 
 #Plotting results
 ##Line Graph
@@ -95,7 +92,7 @@ splitBarPlot <- ggplot(resultsCentury)+
 
 ##Looking at fluxes
 result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
-resultsflux <- fetchvars(core, 2000:2300, result_vars, scenario = "RCP 4.5")
+resultsflux <- fetchvars(core, 2000:2100, result_vars, scenario = "RCP 4.5")
 
 #Calculating atmosphere flux
 resultsflux %>%
@@ -153,3 +150,4 @@ splitBarPlot
 fluxLine
 fluxFacetLine
 fluxBar 
+
