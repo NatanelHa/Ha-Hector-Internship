@@ -10,33 +10,39 @@ theme_set(theme_bw())
 ## Basic Run
 #Configuring INI File
 ini_file_norm <- system.file("input", "hector_rcp45.ini", package = "hector")
-ini_file_3pump <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/InputTesting/myInputPump3.ini"
-ini_file_7pump <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/InputTesting/myInputPump7.ini"
+path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/InputTesting/"
+ini_file_3pump <- paste(path, "myInputPump3.ini", sep="")
+ini_file_7pump <- paste(path, "myInputPump7.ini", sep="")
+ini_file_Neg1pump <- paste(path, "myInputPumpNeg1.ini", sep="")
 
 #Initialize a Hector Instance for each file
 coreNorm <- newcore(ini_file_norm)
 core3pump <- newcore(ini_file_3pump)
 core7pump <- newcore(ini_file_7pump)
+coreNeg1pump <- newcore(ini_file_Neg1pump)
 
 #Run the Cores
 run(coreNorm) 
 run(core3pump)
 run(core7pump)
+run(coreNeg1pump)
 
 #Retrieve Results
 resultsNorm <- fetchvars(coreNorm, 2000:2100, scenario = "Normal")
 results3 <- fetchvars(core3pump, 2000:2100, scenario = "Pump 3x")
 results7 <- fetchvars(core7pump, 2000:2100, scenario = "Pump 7x")
+resultsNeg1 <- fetchvars(coreNeg1pump, 2000:2100, scenario = "Pump -1x")
 
 #Retrieve fluxes Results 
 result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
 resultsNormFlux <- fetchvars(coreNorm, 2000:2100, result_vars, scenario = "Normal")
 results3Flux <- fetchvars(core3pump, 2000:2100, result_vars,  scenario = "Pump 3x")
 results7Flux <- fetchvars(core7pump, 2000:2100, result_vars,  scenario = "Pump 7x")
+resultsNeg1Flux <- fetchvars(coreNeg1pump, 2000:2100, result_vars,  scenario = "Pump -1x")
 
-#Combining into one Dataset 
-results <- rbind(resultsNorm, results3, results7)
-resultsFlux <- rbind(resultsNormFlux, results3Flux, results7Flux)
+#Combining into one dataset 
+results <- rbind(resultsNorm, results3, results7, resultsNeg1)
+resultsFlux <- rbind(resultsNormFlux, results3Flux, results7Flux, resultsNeg1Flux)
 
 #Calculating Atmospheric flux 
 resultsFlux %>%
