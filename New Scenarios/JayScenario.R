@@ -36,3 +36,5 @@ data %>%
 data$emissions<-na.approx(data$emissions, data$Years)/3670
 
 data$antiemissions<-na.approx(data$antiemissions, data$Years)/3670
+
+write.csv(data, paste(path,"New Scenarios/SSP1-1p9-DACCS-3pctHR.csv", sep=""), row.names = FALSE)
