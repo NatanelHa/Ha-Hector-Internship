@@ -13,7 +13,7 @@ ini_file_norm <- system.file("input", "hector_rcp45.ini", package = "hector")
 ini_file_3pump <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/InputTesting/myInputPump3.ini"
 ini_file_7pump <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/InputTesting/myInputPump7.ini"
 
-#Initialize a Hector Instance
+#Initialize a Hector Instance for each file
 coreNorm <- newcore(ini_file_norm)
 core3pump <- newcore(ini_file_3pump)
 core7pump <- newcore(ini_file_7pump)
@@ -34,37 +34,19 @@ resultsNormFlux <- fetchvars(coreNorm, 2000:2100, result_vars, scenario = "Norma
 results3Flux <- fetchvars(core3pump, 2000:2100, result_vars,  scenario = "Pump 3x")
 results7Flux <- fetchvars(core7pump, 2000:2100, result_vars,  scenario = "Pump 7x")
 
-##Calculating atmosphere flux
-resultsNormFlux %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions) %>%
-  pivot_longer(3:5, names_to = "variable")->
-  resultsNormFlux
-
-results3Flux %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions) %>%
-  pivot_longer(3:5, names_to = "variable")->
-  results3Flux
-
-results7Flux %>%
-  select(-units) %>%
-  pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions) %>%
-  pivot_longer(3:5, names_to = "variable")->
-  results7Flux
-
-
-#Combining
+#Combining into one Dataset 
 results <- rbind(resultsNorm, results3, results7)
 resultsFlux <- rbind(resultsNormFlux, results3Flux, results7Flux)
 
-#Line graph
+#Calculating Atmospheric flux 
+resultsFlux %>%
+  select(-units) %>%
+  pivot_wider(names_from = variable) %>%
+  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions) %>%
+  pivot_longer(3:5, names_to = "variable")->
+  resultsFlux
+
 ##Line Graph
 lineGraphCompare <- ggplot(results)+
   aes(x = year, y = value, color = scenario) +
