@@ -1,6 +1,7 @@
 #Importing Libraries
 library(dplyr)
 library(tidyr)
+library(zoo)
 
 #Reading in the csv
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/"
@@ -11,5 +12,26 @@ data <- readr::read_csv(paste(path,
 #Filtering data
 data %>%
   filter(Region=="World") %>%
-  filter(Variable =="Emissions|CO2" | Variable =="Carbon Sequestration|Direct Air Capture")->
+  filter(Variable =="Emissions|CO2" | Variable =="Carbon Sequestration|Direct Air Capture") %>%
+  filter(Scenario=="SSP1-1p9-DACCS-3pctHR")%>%
+  select(-Model, -Unit, -Scenario, -Region)->
   data
+
+#Wide to long and column changing
+data %>%
+  pivot_longer(-Variable, names_to = "Years")->
+  data
+
+#Converting to Int
+data$Years <- as.integer(data$Years)
+
+#Filling in blank years
+data %>%
+  complete(Variable, Years = 2005:2100) %>%
+  pivot_wider(names_from=Variable)%>%
+  rename(emissions = "Emissions|CO2")%>%
+  rename(antiemissions = "Carbon Sequestration|Direct Air Capture") ->
+  data
+
+data$emissions<-na.approx(data$emissions, data$Years)
+data$antiemissions<-na.approx(data$antiemissions, data$Years)
