@@ -10,7 +10,7 @@ theme_set(theme_bw())
 ## Basic Run
 #Configuring INI File
 ini_file_norm <- system.file("input", "hector_rcp45.ini", package = "hector")
-path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/InputTesting/"
+path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
 ini_file_3pump <- paste(path, "myInputPump3.ini", sep="")
 ini_file_7pump <- paste(path, "myInputPump7.ini", sep="")
 ini_file_Neg1pump <- paste(path, "myInputPumpNeg1.ini", sep="")
