@@ -33,5 +33,6 @@ data %>%
   rename(antiemissions = "Carbon Sequestration|Direct Air Capture") ->
   data
 
-data$emissions<-na.approx(data$emissions, data$Years)
-data$antiemissions<-na.approx(data$antiemissions, data$Years)
+data$emissions<-na.approx(data$emissions, data$Years)/3670
+
+data$antiemissions<-na.approx(data$antiemissions, data$Years)/3670
