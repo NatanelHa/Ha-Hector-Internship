@@ -8,12 +8,14 @@ path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/"
 data <- readr::read_csv(paste(path,
                               "GCAM scenario data/GCAM-DAC-SSP3pctHR.csv", 
                               sep =""))
+#setting scenario
+scenario <- "SSP1-1p9-DACCS-3pctHR"
 
 #Filtering data
 data %>%
   filter(Region=="World") %>%
   filter(Variable =="Emissions|CO2" | Variable =="Carbon Sequestration|Direct Air Capture") %>%
-  filter(Scenario=="SSP1-1p9-DACCS-3pctHR")%>%
+  filter(Scenario==scenario)%>%
   select(-Model, -Unit, -Scenario, -Region)->
   data
 
@@ -37,4 +39,4 @@ data$emissions<-na.approx(data$emissions, data$Years)/3670
 
 data$antiemissions<-na.approx(data$antiemissions, data$Years)/3670
 
-write.csv(data, paste(path,"New Scenarios/SSP1-1p9-DACCS-3pctHR.csv", sep=""), row.names = FALSE)
+write.csv(data, paste(path,"New Scenarios/",scenario,".csv", sep=""), row.names = FALSE)
