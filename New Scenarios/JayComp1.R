@@ -72,3 +72,6 @@ fluxFacetLineCompare <- ggplot(resultsFlux)+
 #Comparing RCPs
 lineGraphCompare
 fluxFacetLineCompare
+
+trackingdata <- readr::read_csv("))
+

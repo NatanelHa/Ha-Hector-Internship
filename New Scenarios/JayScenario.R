@@ -9,12 +9,14 @@ data <- readr::read_csv(paste(path,
                               "GCAM scenario data/GCAM-DAC-SSP3pctHR.csv", 
                               sep =""))
 #setting scenario
-scenario <- "SSP1-1p9-DACCS-3pctHR"
+scenario <- "SSP5-2p6-DACCS-3pctHR"
 
 #Filtering data
 data %>%
   filter(Region=="World") %>%
-  filter(Variable =="Emissions|CO2" | Variable =="Carbon Sequestration|Direct Air Capture") %>%
+  filter(Variable =="Emissions|CO2|Energy and Industrial Processes" 
+         | Variable =="Emissions|CO2|AFOLU" 
+         | Variable =="Carbon Sequestration|Direct Air Capture") %>%
   filter(Scenario==scenario)%>%
   select(-Model, -Unit, -Scenario, -Region)->
   data
@@ -31,11 +33,14 @@ data$Years <- as.integer(data$Years)
 data %>%
   complete(Variable, Years = 2005:2100) %>%
   pivot_wider(names_from=Variable)%>%
-  rename(emissions = "Emissions|CO2")%>%
+  rename(ffi_emissions = "Emissions|CO2|Energy and Industrial Processes")%>%
+  rename(luc_emissions = "Emissions|CO2|AFOLU")%>%
   rename(antiemissions = "Carbon Sequestration|Direct Air Capture") ->
   data
 
-data$emissions<-na.approx(data$emissions, data$Years)/3670
+data$ffi_emissions<-na.approx(data$ffi_emissions, data$Years)/3670
+
+data$luc_emissions<-na.approx(data$luc_emissions, data$Years)/3670
 
 data$antiemissions<-na.approx(data$antiemissions, data$Years)/3670
 
