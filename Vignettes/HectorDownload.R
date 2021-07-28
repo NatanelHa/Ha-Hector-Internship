@@ -1,4 +1,2 @@
 #Installing Hector 
-install.packages("devtools")
-devtools::install_github("jgcri/hector")
-
+devtools::install("/Users/Natanel Ha/Documents/GitHub/hector")
