@@ -14,5 +14,7 @@ core
 #Run the Core
 run(core) 
 
+td <- get_tracking_data(core)
+tracking <-read.csv(textConnection(td))
+
 shutdown(core)
-#trackingdata <- readr::read_csv("output/tracking_rcp45.csv")
