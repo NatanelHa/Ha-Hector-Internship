@@ -9,7 +9,7 @@ data <- readr::read_csv(paste(path,
                               "GCAM scenario data/GCAM-DAC-SSP3pctHR.csv", 
                               sep =""))
 #setting scenario
-scenario <- "SSP1-1p9-DACCS-3pctHR"
+scenario <- "SSP1-2p6-DACCS-3pctHR"
 
 #Filtering data
 data %>%
@@ -50,8 +50,8 @@ data$antiemissionsCCS<-na.approx(data$antiemissionsCCS, data$Years)/3670
 
 data %>%
   mutate(ffi_emissions = ffi_emissions_with_negative + antiemissionsDAC)%>%
-  mutate(luc_emissions = luc_emissions_with_negative)%>%
-  mutate(daccs_uptake = antiemissionsDAC)%>%
+  mutate(luc_emissions = luc_emissions_with_negative + antiemissionsCCS)%>%
+  mutate(daccs_uptake = antiemissionsDAC + antiemissionsCCS)%>%
   select(Years, ffi_emissions, daccs_uptake, luc_emissions) ->
   data
 
