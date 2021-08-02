@@ -53,9 +53,8 @@ resultsJay4Flux <- fetchvars(coreJay4, 2005:2100, result_vars, scenario = "Jay C
 resultsJay5Flux <- fetchvars(coreJay5, 2005:2100, result_vars, scenario = "Jay CCS Pos Luc")
 
 #Combining into one dataset 
-results <- rbind(resultsNorm, resultsJay1, resultsJay2, resultsJay3, resultsJay4, resultsJay5)
-resultsFlux <- rbind(resultsNormFlux, resultsJay1Flux, resultsJay2Flux, 
-                     resultsJay3Flux, resultsJay4Flux, resultsJay5Flux)
+results <- rbind(resultsNorm, resultsJay1)
+resultsFlux <- rbind(resultsNormFlux, resultsJay1Flux)
 
 #Calculating Atmospheric flux 
 resultsFlux %>%
@@ -86,7 +85,7 @@ lineGraphCompare <- ggplot(data_label)+
   geom_label_repel(aes(label = label),
                    nudge_x = 1,
                    na.rm = TRUE) +
-  scale_color_viridis_d()+
+  #scale_color_viridis_d()+
   xlab("Year")
 
 
@@ -100,7 +99,7 @@ fluxFacetLineCompare <- ggplot(resultsFlux)+
                                               "atm_ocean_flux" = "Ocean Net Flux",
                                               "atmosphere_flux" = "Atmosphere Net Flux")))+
   ylab("Carbon Flux(Pg C/yr)")+
-  scale_color_viridis_d()+
+  #scale_color_viridis_d()+
   xlab("Year")
 
 #Comparing RCPs

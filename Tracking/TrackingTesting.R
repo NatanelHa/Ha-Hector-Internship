@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 
 #tracking plot function
-tracking_plot <-function(ini_file, graph_type, title) {
+tracking_plot <- function(ini_file, graph_type, title) {
   #establish core
   core <- newcore(ini_file)
   
@@ -13,12 +13,14 @@ tracking_plot <-function(ini_file, graph_type, title) {
   
   #Get Results
   results_with_diff <- get_tracking_data(core)
+  results_with_diff
   
   #Filter out diff
   td <-
     results_with_diff %>%
     filter(pool_name != "Diff") %>%
-    mutate(source_amount = source_fraction*pool_value)
+    mutate(source_amount = source_fraction*pool_value)%>%
+    filter(year>=2000)
     
   #Changing Order
   td$pool_namef = factor(td$pool_name, levels=c("detritus_c_global",
@@ -102,23 +104,19 @@ tracking_plot <-function(ini_file, graph_type, title) {
 
 #Getting plots for each RCP
 tracking_plot(system.file("input/hector_rcp26.ini", package = "hector"),
-              "fraction", "RCP 2.6")
-#tracking_plot(system.file("input/hector_rcp26.ini", package = "hector"),
-#              "amount", "RCP 2.6")
+             "fraction", "RCP 2.6")
+tracking_plot(system.file("input/hector_rcp26.ini", package = "hector"),
+              "amount", "RCP 2.6")
 
-#tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
-#              "fraction", "RCP 4.5") 
-#tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
-#              "amount", "RCP 4.5") 
+tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
+              "fraction", "RCP 4.5") 
+tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
+             "amount", "RCP 4.5") 
 
-#tracking_plot(system.file("input/hector_rcp60.ini", package = "hector"), 
-#              "fraction", "RCP 6.0")
-#tracking_plot(system.file("input/hector_rcp60.ini", package = "hector"), 
-#              "amount", "RCP 6.0")
-
-#tracking_plot(system.file("input/hector_rcp85.ini", package = "hector"), 
-#              "fraction", "RCP 8.5")
-tracking_plot(system.file("input/hector_rcp85.ini", package = "hector"), 
-             "amount", "RCP 8.5")
-
+tracking_plot(system.file("input/hector_rcp26 _1750.ini", package = "hector"),
+              "amount", "RCP 2.6")
+tracking_plot(system.file("input/hector_rcp26 _1850.ini", package = "hector"),
+              "amount", "RCP 2.6")
+tracking_plot(system.file("input/hector_rcp26 _1950.ini", package = "hector"),
+              "amount", "RCP 2.6")
 
