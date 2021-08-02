@@ -19,6 +19,18 @@ tracking_plot <-function(ini_file, graph_type, title) {
     results_with_diff %>%
     filter(pool_name != "Diff") %>%
     mutate(source_amount = source_fraction*pool_value)
+    
+  #Changing Order
+  td$pool_namef = factor(td$pool_name, levels=c("detritus_c_global",
+                                                "veg_c_global",
+                                                "soil_c_global",
+                                                "earth_c",
+                                                "atmos_c",
+                                                "HL",
+                                                "intermediate",
+                                                "LL",
+                                                "deep"))
+  
   
   #Set Theme
   theme_set(theme_minimal())
@@ -27,7 +39,25 @@ tracking_plot <-function(ini_file, graph_type, title) {
     areaGraph <- ggplot(td)+
       aes(x = year, y = source_fraction, fill = source_name)+
       geom_bar(stat = "identity")+
-      facet_wrap(~pool_name, scales = "free_y")+
+      facet_wrap(~pool_namef,
+                 labeller = labeller(pool_namef = c("detritus_c_global" = "Detritus",
+                                                "veg_c_global" = "Vegetation",
+                                                "soil_c_global" = "Soil",
+                                                "earth_c" = "Earth",
+                                                "atmos_c" = "Atmosphere",
+                                                "HL" = "High Level Ocean",
+                                                "intermediate" = "Intermediate Ocean",
+                                                "LL" = "Low Level Ocean",
+                                                "deep" = "Deep Ocean")))+
+      scale_fill_discrete(labels = c("Detritus",
+                                     "Vegetation",
+                                     "Soil",
+                                     "Earth",
+                                     "Atmosphere",
+                                     "High Level Ocean",
+                                     "Intermediate Ocean",
+                                     "Low Level Ocean",
+                                     "Deep Ocean"))+
       geom_col(width = 1)+
       guides(fill = guide_legend(title = "Carbon Pools"))+
       ylab("Source Fraction") +
@@ -38,7 +68,25 @@ tracking_plot <-function(ini_file, graph_type, title) {
     areaGraph<- ggplot(td)+
       aes(x = year, y = source_amount, fill = source_name)+
       geom_bar(stat = "identity")+
-      facet_wrap(~pool_name, scales = "free_y")+
+      facet_wrap(~pool_namef, scales = "free_y", 
+                 labeller = labeller(pool_namef = c("detritus_c_global" = "Detritus",
+                                                  "veg_c_global" = "Vegetation",
+                                                  "soil_c_global"= "Soil",
+                                                  "earth_c" = "Earth",
+                                                  "atmos_c" = "Atmosphere",
+                                                  "HL" = "High Level Ocean",
+                                                  "intermediate" = "Intermediate Ocean",
+                                                  "LL" = "Low Level Ocean",
+                                                  "deep" = "Deep Ocean")))+
+      scale_fill_discrete(labels = c("Detritus",
+                                     "Vegetation",
+                                     "Soil",
+                                     "Earth",
+                                     "Atmosphere",
+                                     "High Level Ocean",
+                                     "Intermediate Ocean",
+                                     "Low Level Ocean",
+                                     "Deep Ocean"))+
       geom_col(width = 1)+
       guides(fill = guide_legend(title = "Carbon Pools"))+
       ylab("Source Amount (Pg C)") +
@@ -55,22 +103,22 @@ tracking_plot <-function(ini_file, graph_type, title) {
 #Getting plots for each RCP
 tracking_plot(system.file("input/hector_rcp26.ini", package = "hector"),
               "fraction", "RCP 2.6")
-tracking_plot(system.file("input/hector_rcp26.ini", package = "hector"),
-              "amount", "RCP 2.6")
+#tracking_plot(system.file("input/hector_rcp26.ini", package = "hector"),
+#              "amount", "RCP 2.6")
 
-tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
-              "fraction", "RCP 4.5") 
-tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
-              "amount", "RCP 4.5") 
+#tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
+#              "fraction", "RCP 4.5") 
+#tracking_plot(system.file("input/hector_rcp45.ini", package = "hector"), 
+#              "amount", "RCP 4.5") 
 
-tracking_plot(system.file("input/hector_rcp60.ini", package = "hector"), 
-              "fraction", "RCP 6.0")
-tracking_plot(system.file("input/hector_rcp60.ini", package = "hector"), 
-              "amount", "RCP 6.0")
+#tracking_plot(system.file("input/hector_rcp60.ini", package = "hector"), 
+#              "fraction", "RCP 6.0")
+#tracking_plot(system.file("input/hector_rcp60.ini", package = "hector"), 
+#              "amount", "RCP 6.0")
 
+#tracking_plot(system.file("input/hector_rcp85.ini", package = "hector"), 
+#              "fraction", "RCP 8.5")
 tracking_plot(system.file("input/hector_rcp85.ini", package = "hector"), 
-              "fraction", "RCP 8.5")
-tracking_plot(system.file("input/hector_rcp85.ini", package = "hector"), 
-              "amount", "RCP 8.5")
+             "amount", "RCP 8.5")
 
 
