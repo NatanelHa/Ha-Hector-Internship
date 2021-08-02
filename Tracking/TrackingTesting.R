@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 
 # tracking plot function
-tracking_plot <- function(ini_file, graph_type, title) {
+tracking_plot <- function(ini_file, graph_type, pool, title) {
   # establish core
   core <- newcore(ini_file)
 
@@ -37,6 +37,12 @@ tracking_plot <- function(ini_file, graph_type, title) {
 
   # Set Theme
   theme_set(theme_minimal())
+
+  if (pool != "all") {
+    td %>%
+      filter(pool_name == pool) ->
+    td
+  }
 
   # Graph of Fractional Portion
   if (graph_type == "fraction") {
@@ -116,21 +122,31 @@ tracking_plot <- function(ini_file, graph_type, title) {
   areaGraph
 }
 
-# Getting plots for RCP 2.6 and 4.5
+# Getting plots for all RCPs
 tracking_plot(
   system.file("input/hector_rcp26.ini", package = "hector"),
-  "fraction", "RCP 2.6"
+  "fraction", "all", "RCP 2.6"
 )
 tracking_plot(
   system.file("input/hector_rcp26.ini", package = "hector"),
-  "amount", "RCP 2.6"
+  "amount", "earth_c", "RCP 2.6"
 )
 
 tracking_plot(
   system.file("input/hector_rcp45.ini", package = "hector"),
-  "fraction", "RCP 4.5"
+  "fraction", "atmos_c", "RCP 4.5"
 )
 tracking_plot(
   system.file("input/hector_rcp45.ini", package = "hector"),
-  "amount", "RCP 4.5"
+  "amount", "all", "RCP 4.5"
+)
+
+tracking_plot(
+  system.file("input/hector_rcp60.ini", package = "hector"),
+  "fraction", "all", "RCP 6.0"
+)
+
+tracking_plot(
+  system.file("input/hector_rcp85.ini", package = "hector"),
+  "amount", "all", "RCP 8.5"
 )
