@@ -44,7 +44,7 @@ resultsJay5 <- fetchvars(coreJay5, 2005:2100, scenario = "Jay CCS Pos Luc")
 
 
 #Retrieve fluxes Results 
-result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS())
+result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS(), DACCS_UPTAKE())
 resultsNormFlux <- fetchvars(coreNorm, 2005:2100, result_vars, scenario = "Normal")
 resultsJay1Flux <- fetchvars(coreJay1, 2005:2100, result_vars, scenario = "Jay")
 resultsJay2Flux <- fetchvars(coreJay2, 2005:2100, result_vars, scenario = "Jay No Luc")
@@ -61,8 +61,8 @@ resultsFlux <- rbind(resultsNormFlux, resultsJay1Flux, resultsJay2Flux,
 resultsFlux %>%
   select(-units) %>%
   pivot_wider(names_from = variable) %>%
-  mutate(atmosphere_flux = (ffi_emissions - atm_ocean_flux - atm_land_flux))%>%
-  select(-ffi_emissions) %>%
+  mutate(atmosphere_flux = (ffi_emissions - daccs_uptake - atm_ocean_flux - atm_land_flux))%>%
+  select(-ffi_emissions, -daccs_uptake) %>%
   pivot_longer(3:5, names_to = "variable")->
   resultsFlux
 
