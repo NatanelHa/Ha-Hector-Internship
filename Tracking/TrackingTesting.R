@@ -19,8 +19,7 @@ tracking_plot <- function(ini_file, graph_type, title) {
   td <-
     results_with_diff %>%
     filter(pool_name != "Diff") %>%
-    mutate(source_amount = source_fraction*pool_value)%>%
-    filter(year>=2000)
+    mutate(source_amount = source_fraction*pool_value)
     
   #Changing Order
   td$pool_namef = factor(td$pool_name, levels=c("detritus_c_global",
