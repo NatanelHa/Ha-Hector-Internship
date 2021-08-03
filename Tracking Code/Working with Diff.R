@@ -5,7 +5,7 @@ library(dplyr)
 library(tidyr)
 
 # Tracking plot Function
-difference_plot <- function(ini_file, pool, title) {
+difference_plot <- function(ini_file, start, stop, pool, title) {
   core <- newcore(ini_file, suppresslogging = TRUE)
 
   # run core
@@ -37,7 +37,8 @@ difference_plot <- function(ini_file, pool, title) {
 
   # Filtering out years and NA
   td %>%
-    filter(year >= 2000) %>%
+    filter(year >= start) %>%
+    filter(year <= stop) %>%
     filter(!is.na(differ)) ->
   td
 
@@ -86,15 +87,6 @@ difference_plot <- function(ini_file, pool, title) {
 
 # Running RCP 2.6 and RCP 4.5
 rcp26 <- system.file("input/hector_rcp26.ini", package = "hector")
-difference_plot(rcp26, "all", "RCP 2.6")
-difference_plot(rcp26, "earth_c", "RCP 2.6")
-difference_plot(rcp26, "atmos_c", "RCP 2.6")
-
-rcp45 <- system.file("input/hector_rcp45.ini", package = "hector")
-difference_plot(rcp45, "all", "RCP 4.5")
-
-rcp60 <- system.file("input/hector_rcp60.ini", package = "hector")
-difference_plot(rcp60, "all", "RCP 6.0")
-
-rcp85 <- system.file("input/hector_rcp85.ini", package = "hector")
-difference_plot(rcp85, "all", "RCP 8.5")
+difference_plot(rcp26, 2000, 2100, "all", "RCP 2.6")
+difference_plot(rcp26, 2050, 2300, "earth_c", "RCP 2.6")
+difference_plot(rcp26, 2050, 2150, "earth_c", "RCP 2.6")

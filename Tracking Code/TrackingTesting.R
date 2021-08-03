@@ -4,7 +4,7 @@ library(ggplot2)
 library(dplyr)
 
 # tracking plot function
-tracking_plot <- function(ini_file, graph_type, pool, title) {
+tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
   # establish core
   core <- newcore(ini_file)
 
@@ -15,10 +15,12 @@ tracking_plot <- function(ini_file, graph_type, pool, title) {
   results_with_diff <- get_tracking_data(core)
   results_with_diff
 
-  # Filter out diff
+  # Filter out diff and year
   td <-
     results_with_diff %>%
     filter(pool_name != "Diff") %>%
+    filter(year <= stop) %>%
+    filter(year >= start) %>%
     mutate(source_amount = source_fraction * pool_value)
 
   # Changing Order
@@ -79,7 +81,7 @@ tracking_plot <- function(ini_file, graph_type, pool, title) {
       ggtitle(title) +
       xlab("Year")
 
-    # Graph of the amunt of Carbon
+    # Graph of the Amount of Carbon
   } else {
     areaGraph <- ggplot(td) +
       aes(x = year, y = source_amount, fill = source_name) +
@@ -124,29 +126,18 @@ tracking_plot <- function(ini_file, graph_type, pool, title) {
 
 # Getting plots for all RCPs
 tracking_plot(
-  system.file("input/hector_rcp26.ini", package = "hector"),
+  system.file("input/hector_rcp26.ini", package = "hector"), 1750, 2300,
   "fraction", "all", "RCP 2.6"
 )
 tracking_plot(
-  system.file("input/hector_rcp26.ini", package = "hector"),
+  system.file("input/hector_rcp26.ini", package = "hector"), 1750, 2300,
+  "amount", "all", "RCP 2.6"
+)
+tracking_plot(
+  system.file("input/hector_rcp26.ini", package = "hector"), 2000, 2300,
+  "fraction", "earth_c", "RCP 2.6"
+)
+tracking_plot(
+  system.file("input/hector_rcp26.ini", package = "hector"), 2000, 2300,
   "amount", "earth_c", "RCP 2.6"
-)
-
-tracking_plot(
-  system.file("input/hector_rcp45.ini", package = "hector"),
-  "fraction", "atmos_c", "RCP 4.5"
-)
-tracking_plot(
-  system.file("input/hector_rcp45.ini", package = "hector"),
-  "amount", "all", "RCP 4.5"
-)
-
-tracking_plot(
-  system.file("input/hector_rcp60.ini", package = "hector"),
-  "fraction", "all", "RCP 6.0"
-)
-
-tracking_plot(
-  system.file("input/hector_rcp85.ini", package = "hector"),
-  "amount", "all", "RCP 8.5"
 )
