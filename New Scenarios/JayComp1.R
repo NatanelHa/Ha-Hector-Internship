@@ -13,48 +13,53 @@ theme_set(theme_bw())
 ini_file_norm <- system.file("input", "hector_rcp26.ini", package = "hector")
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
 ini_file_jay1 <- paste(path, "JayScenario1.ini", sep="")
-ini_file_jay2 <- paste(path, "JayScenario2.ini", sep="")
-ini_file_jay3 <- paste(path, "JayScenario3.ini", sep="")
-ini_file_jay4 <- paste(path, "JayScenario4.ini", sep="")
-ini_file_jay5 <- paste(path, "JayScenario5.ini", sep="")
+#ini_file_jay2 <- paste(path, "JayScenario2.ini", sep="")
+#ini_file_jay3 <- paste(path, "JayScenario3.ini", sep="")
+#ini_file_jay4 <- paste(path, "JayScenario4.ini", sep="")
+#ini_file_jay5 <- paste(path, "JayScenario5.ini", sep="")
+ini_file_jay6 <- paste(path, "JayScenario6.ini", sep="")
 
 #Initialize a Hector Instance for each file
 coreNorm <- newcore(ini_file_norm)
 coreJay1 <- newcore(ini_file_jay1)
-coreJay2 <- newcore(ini_file_jay2)
-coreJay3 <- newcore(ini_file_jay3)
-coreJay4 <- newcore(ini_file_jay4)
-coreJay5 <- newcore(ini_file_jay5)
+#coreJay2 <- newcore(ini_file_jay2)
+#coreJay3 <- newcore(ini_file_jay3)
+#coreJay4 <- newcore(ini_file_jay4)
+#coreJay5 <- newcore(ini_file_jay5)
+coreJay6 <- newcore(ini_file_jay6)
 
 #Run the Cores
 run(coreNorm) 
 run(coreJay1)
-run(coreJay2)
-run(coreJay3)
-run(coreJay4)
-run(coreJay5)
+#run(coreJay2)
+#run(coreJay3)
+#run(coreJay4)
+#run(coreJay5)
+run(coreJay6)
 
 #Retrieve Results
 resultsNorm <- fetchvars(coreNorm, 2005:2100, scenario = "Normal")
 resultsJay1 <- fetchvars(coreJay1, 2005:2100, scenario = "Jay")
-resultsJay2 <- fetchvars(coreJay2, 2005:2100, scenario = "Jay No Luc")
-resultsJay3 <- fetchvars(coreJay3, 2005:2100, scenario = "Jay CCS")
-resultsJay4 <- fetchvars(coreJay4, 2005:2100, scenario = "Jay CCS No Luc")
-resultsJay5 <- fetchvars(coreJay5, 2005:2100, scenario = "Jay CCS Pos Luc")
+#resultsJay2 <- fetchvars(coreJay2, 2005:2100, scenario = "Jay No Luc")
+#resultsJay3 <- fetchvars(coreJay3, 2005:2100, scenario = "Jay CCS")
+#resultsJay4 <- fetchvars(coreJay4, 2005:2100, scenario = "Jay CCS No Luc")
+#resultsJay5 <- fetchvars(coreJay5, 2005:2100, scenario = "Jay CCS Pos Luc")
+resultsJay6 <- fetchvars(coreJay6, 2005:2100, scenario = "Jay Unsplit")
 
 
 #Retrieve fluxes Results 
 result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS(), DACCS_UPTAKE())
 resultsNormFlux <- fetchvars(coreNorm, 2005:2100, result_vars, scenario = "Normal")
 resultsJay1Flux <- fetchvars(coreJay1, 2005:2100, result_vars, scenario = "Jay")
-resultsJay2Flux <- fetchvars(coreJay2, 2005:2100, result_vars, scenario = "Jay No Luc")
-resultsJay3Flux <- fetchvars(coreJay3, 2005:2100, result_vars, scenario = "Jay CCS")
-resultsJay4Flux <- fetchvars(coreJay4, 2005:2100, result_vars, scenario = "Jay CCS No Luc")
-resultsJay5Flux <- fetchvars(coreJay5, 2005:2100, result_vars, scenario = "Jay CCS Pos Luc")
+#resultsJay2Flux <- fetchvars(coreJay2, 2005:2100, result_vars, scenario = "Jay No Luc")
+#resultsJay3Flux <- fetchvars(coreJay3, 2005:2100, result_vars, scenario = "Jay CCS")
+#resultsJay4Flux <- fetchvars(coreJay4, 2005:2100, result_vars, scenario = "Jay CCS No Luc")
+#resultsJay5Flux <- fetchvars(coreJay5, 2005:2100, result_vars, scenario = "Jay CCS Pos Luc")
+resultsJay6Flux <- fetchvars(coreJay6, 2005:2100, result_vars, scenario = "Jay Unsplit")
 
 #Combining into one dataset 
-results <- rbind(resultsNorm, resultsJay1)
-resultsFlux <- rbind(resultsNormFlux, resultsJay1Flux)
+results <- rbind(resultsNorm, resultsJay1, resultsJay6)
+resultsFlux <- rbind(resultsNormFlux, resultsJay1Flux, resultsJay6Flux)
 
 #Calculating Atmospheric flux 
 resultsFlux %>%

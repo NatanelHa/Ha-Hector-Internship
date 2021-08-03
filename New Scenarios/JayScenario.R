@@ -1,58 +1,60 @@
-#Importing Libraries
+# Importing Libraries
 library(dplyr)
 library(tidyr)
 library(zoo)
 
-#Reading in the csv
+# Reading in the csv
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/"
 data <- readr::read_csv(paste(path,
-                              "GCAM scenario data/GCAM-DAC-SSP3pctHR.csv", 
-                              sep =""))
-#setting scenario
+  "GCAM scenario data/GCAM-DAC-SSP3pctHR.csv",
+  sep = ""
+))
+# setting scenario
 scenario <- "SSP1-2p6-DACCS-3pctHR"
 
-#Filtering data
+# Filtering data
 data %>%
-  filter(Region=="World") %>%
-  filter(Variable =="Emissions|CO2|Energy and Industrial Processes" 
-         | Variable =="Emissions|CO2|AFOLU" 
-         | Variable =="Carbon Sequestration|Direct Air Capture"
-         | Variable =="Carbon Sequestration|CCS") %>%
-  filter(Scenario==scenario)%>%
-  select(-Model, -Unit, -Scenario, -Region)->
-  data
+  filter(Region == "World") %>%
+  filter(Variable == "Emissions|CO2|Energy and Industrial Processes" |
+    Variable == "Emissions|CO2|AFOLU" |
+    Variable == "Carbon Sequestration|Direct Air Capture" |
+    Variable == "Carbon Sequestration|CCS") %>%
+  filter(Scenario == scenario) %>%
+  select(-Model, -Unit, -Scenario, -Region) ->
+data
 
-#Wide to long and column changing
+# Wide to long and column changing
 data %>%
-  pivot_longer(-Variable, names_to = "Years")->
-  data
+  pivot_longer(-Variable, names_to = "Years") ->
+data
 
-#Converting to Int
+# Converting to Int
 data$Years <- as.integer(data$Years)
 
-#Filling in blank years
+# Filling in blank years
 data %>%
   complete(Variable, Years = 2005:2100) %>%
-  pivot_wider(names_from=Variable)%>%
-  rename(ffi_emissions_with_negative = "Emissions|CO2|Energy and Industrial Processes")%>%
-  rename(luc_emissions_with_negative = "Emissions|CO2|AFOLU")%>%
+  pivot_wider(names_from = Variable) %>%
+  rename(ffi_emissions_with_negative = "Emissions|CO2|Energy and Industrial Processes") %>%
+  rename(luc_emissions_with_negative = "Emissions|CO2|AFOLU") %>%
   rename(antiemissionsDAC = "Carbon Sequestration|Direct Air Capture") %>%
-  rename(antiemissionsCCS = "Carbon Sequestration|CCS")->
-  data
+  rename(antiemissionsCCS = "Carbon Sequestration|CCS") ->
+data
 
-data$ffi_emissions_with_negative<-na.approx(data$ffi_emissions_with_negative, data$Years)/3670
+data$ffi_emissions_with_negative <- na.approx(data$ffi_emissions_with_negative, data$Years) / 3670
 
-data$luc_emissions_with_negative<-na.approx(data$luc_emissions_with_negative, data$Years)/3670
+data$luc_emissions_with_negative <- na.approx(data$luc_emissions_with_negative, data$Years) / 3670
 
-data$antiemissionsDAC<-na.approx(data$antiemissionsDAC, data$Years)/3670
+data$antiemissionsDAC <- na.approx(data$antiemissionsDAC, data$Years) / 3670
 
-data$antiemissionsCCS<-na.approx(data$antiemissionsCCS, data$Years)/3670
+data$antiemissionsCCS <- na.approx(data$antiemissionsCCS, data$Years) / 3670
 
 data %>%
-  mutate(ffi_emissions = ffi_emissions_with_negative + antiemissionsDAC)%>%
-  mutate(luc_emissions = luc_emissions_with_negative + antiemissionsCCS)%>%
-  mutate(daccs_uptake = antiemissionsDAC + antiemissionsCCS)%>%
+  mutate(ffi_emissions = ffi_emissions_with_negative + antiemissionsDAC 
+          + luc_emissions_with_negative) %>%
+  mutate(luc_emissions = luc_emissions_with_negative) %>%
+  mutate(daccs_uptake = antiemissionsDAC) %>%
   select(Years, ffi_emissions, daccs_uptake, luc_emissions) ->
-  data
+data
 
-write.csv(data, paste(path,"New Scenarios/",scenario,".csv", sep=""), row.names = FALSE)
+write.csv(data, paste(path, "New Scenarios/", scenario, ".csv", sep = ""), row.names = FALSE)
