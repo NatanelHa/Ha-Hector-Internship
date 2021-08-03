@@ -64,17 +64,30 @@ tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
           "deep" = "Deep Ocean"
         ))
       ) +
-      scale_fill_discrete(labels = c(
-        "Detritus",
-        "Vegetation",
-        "Soil",
-        "Earth",
-        "Atmosphere",
-        "High Level Ocean",
-        "Intermediate Ocean",
-        "Low Level Ocean",
-        "Deep Ocean"
-      )) +
+      scale_fill_manual(
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth",
+          "Atmosphere",
+          "High Level Ocean",
+          "Intermediate Ocean",
+          "Low Level Ocean",
+          "Deep Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#DDDDDD",
+          "#882255",
+          "#AA4499",
+          "#88CCEE",
+          "#332288"
+        )
+      ) +
       geom_col(width = 1) +
       guides(fill = guide_legend(title = "Carbon Pools")) +
       ylab("Source Fraction") +
@@ -100,17 +113,30 @@ tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
           "deep" = "Deep Ocean"
         ))
       ) +
-      scale_fill_discrete(labels = c(
-        "Detritus",
-        "Vegetation",
-        "Soil",
-        "Earth",
-        "Atmosphere",
-        "High Level Ocean",
-        "Intermediate Ocean",
-        "Low Level Ocean",
-        "Deep Ocean"
-      )) +
+      scale_fill_manual(
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth",
+          "Atmosphere",
+          "High Level Ocean",
+          "Intermediate Ocean",
+          "Low Level Ocean",
+          "Deep Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#DDDDDD",
+          "#882255",
+          "#AA4499",
+          "#88CCEE",
+          "#332288"
+        )
+      ) +
       geom_col(width = 1) +
       guides(fill = guide_legend(title = "Carbon Pools")) +
       ylab("Source Amount (Pg C)") +
@@ -133,6 +159,7 @@ tracking_plot(
   system.file("input/hector_rcp26.ini", package = "hector"), 1750, 2300,
   "amount", "all", "RCP 2.6"
 )
+
 tracking_plot(
   system.file("input/hector_rcp26.ini", package = "hector"), 2000, 2300,
   "fraction", "earth_c", "RCP 2.6"

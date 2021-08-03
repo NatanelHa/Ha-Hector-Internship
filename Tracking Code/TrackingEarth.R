@@ -42,17 +42,30 @@ results
 areaGraph <- ggplot(results) +
   aes(x = year, y = source_amount, fill = source_name) +
   geom_bar(stat = "identity") +
-  scale_fill_discrete(labels = c(
-    "Detritus",
-    "Vegetation",
-    "Soil",
-    "Earth",
-    "Atmosphere",
-    "High Level Ocean",
-    "Intermediate Ocean",
-    "Low Level Ocean",
-    "Deep Ocean"
-  )) +
+  scale_fill_manual(
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere",
+      "High Level Ocean",
+      "Intermediate Ocean",
+      "Low Level Ocean",
+      "Deep Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#882255",
+      "#AA4499",
+      "#88CCEE",
+      "#332288"
+    )
+  ) +
   geom_col(width = 1) +
   guides(fill = guide_legend(title = "Carbon Pools")) +
   ylab("Source Amount (Pg C)") +
@@ -64,17 +77,30 @@ areaGraph
 areaGraph2 <- ggplot(results) +
   aes(x = year, y = source_fraction, fill = source_name) +
   geom_bar(stat = "identity") +
-  scale_fill_discrete(labels = c(
-    "Detritus",
-    "Vegetation",
-    "Soil",
-    "Earth",
-    "Atmosphere",
-    "High Level Ocean",
-    "Intermediate Ocean",
-    "Low Level Ocean",
-    "Deep Ocean"
-  )) +
+  scale_fill_manual(
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere",
+      "High Level Ocean",
+      "Intermediate Ocean",
+      "Low Level Ocean",
+      "Deep Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#882255",
+      "#AA4499",
+      "#88CCEE",
+      "#332288"
+    )
+  ) +
   geom_col(width = 1) +
   guides(fill = guide_legend(title = "Carbon Pools")) +
   ylab("Source Fraction") +

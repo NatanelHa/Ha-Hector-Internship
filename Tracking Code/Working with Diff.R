@@ -65,7 +65,7 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
         "deep" = "Deep Ocean"
       ))
     ) +
-    scale_fill_discrete(labels = c(
+    scale_fill_manual(labels = c(
       "Detritus",
       "Vegetation",
       "Soil",
@@ -75,6 +75,17 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
       "Intermediate Ocean",
       "Low Level Ocean",
       "Deep Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#882255",
+      "#AA4499",
+      "#88CCEE",
+      "#332288"
     )) +
     geom_col(width = 1) +
     guides(fill = guide_legend(title = "Carbon Pools")) +
