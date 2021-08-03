@@ -168,3 +168,4 @@ tracking_plot(
   system.file("input/hector_rcp26.ini", package = "hector"), 2000, 2300,
   "amount", "earth_c", "RCP 2.6"
 )
+
