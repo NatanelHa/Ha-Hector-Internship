@@ -3,112 +3,159 @@ library(hector)
 library(ggplot2)
 library(dplyr)
 
-path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
-ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
-ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep = "")
-ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep = "")
-ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
+earth_plot <- function(ini_file, start, stop, type, scenario) {
+  # Establish core
+  core <- newcore(ini_file, suppresslogging = TRUE)
 
-# Establish core
-rcp26 <- system.file("input/hector_rcp26.ini", package = "hector")
-core <- newcore(ini_file_SSP2, suppresslogging = TRUE)
+  # Run core
+  run(core)
 
-# Run core
-run(core)
+  # Get Results
+  results <- get_tracking_data(core)
 
-# Get Results
-results <- get_tracking_data(core)
-
-# Calculating source anount
-results %>%
-  filter(pool_name == "earth_c") %>%
-  filter(year >= 2005) %>%
-  filter(year <= 2100) %>%
-  mutate(source_amount = source_fraction * pool_value) ->
-results
-
-# Finding earth_c values in 2073
-# The year negative emissions starts
-earth_2073 <-
+  # Calculating source anount
   results %>%
-  filter(source_name == "earth_c")
+    filter(pool_name == "earth_c") %>%
+    filter(year >= start) %>%
+    filter(year <= stop) %>%
+    mutate(source_amount = source_fraction * pool_value) ->
+  results
 
-earth_2073_carbon <-
-  first(earth_2073$source_amount)
+  # Finding earth_c values in start
+  # The year negative emissions starts
+  earth_start <-
+    results %>%
+    filter(source_name == "earth_c")
 
-earth_2073_fraction <-
-  first(earth_2073$source_fraction)
+  earth_start_carbon <-
+    first(earth_start$source_amount)
 
-# Calculating difference from 2073
-results %>%
-  mutate(source_amount = source_amount - earth_2073_carbon * (source_name == "earth_c")) %>%
-  mutate(source_fraction = source_fraction - earth_2073_fraction * (source_name == "earth_c")) ->
-results
+  earth_start_fraction <-
+    first(earth_start$source_fraction)
 
-# Plotting in area graph of amount
-areaGraph <- ggplot(results) +
-  aes(x = year, y = source_amount, fill = source_name) +
-  geom_area() +
-  scale_fill_manual(
-    labels = c(
-      "Detritus",
-      "Vegetation",
-      "Soil",
-      "Earth",
-      "Atmosphere",
-      "High Level Ocean",
-      "Intermediate Ocean",
-      "Low Level Ocean",
-      "Deep Ocean"
-    ),
-    values = c(
-      "#DDCC77",
-      "#999933",
-      "#44AA99",
-      "#117733",
-      "#DDDDDD",
-      "#882255",
-      "#AA4499",
-      "#88CCEE",
-      "#332288"
-    )
-  ) +
-  guides(fill = guide_legend(title = "Carbon Pools")) +
-  ylab("Source Amount (Pg C)") +
-  ggtitle("Earth Pool (Net Change from 2005)") +
-  xlab("Year")
-areaGraph
+  # Calculating difference from start
+  results %>%
+    mutate(source_amount = source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
+    mutate(source_fraction = source_fraction - earth_start_fraction * (source_name == "earth_c")) ->
+  results
 
-# Plotting in area graph of fraction
-areaGraph2 <- ggplot(results) +
-  aes(x = year, y = source_fraction, fill = source_name) +
-  geom_area() +
-  scale_fill_manual(
-    labels = c(
-      "Detritus",
-      "Vegetation",
-      "Soil",
-      "Earth",
-      "Atmosphere",
-      "High Level Ocean",
-      "Intermediate Ocean",
-      "Low Level Ocean",
-      "Deep Ocean"
-    ),
-    values = c(
-      "#DDCC77",
-      "#999933",
-      "#44AA99",
-      "#117733",
-      "#DDDDDD",
-      "#882255",
-      "#AA4499",
-      "#88CCEE",
-      "#332288"
-    )
-  ) +
-  guides(fill = guide_legend(title = "Carbon Pools")) +
-  ylab("Source Fraction") +
-  ggtitle("Earth Pool fraction (Net Change from 2005)") +
-  xlab("Year")
-areaGraph2
+  if (type == "amount") {
+    # Plotting in area graph of amount
+    areaGraph <- ggplot(results) +
+      aes(x = year, y = source_amount, fill = source_name) +
+      geom_area() +
+      scale_fill_manual(
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth",
+          "Atmosphere",
+          "High Level Ocean",
+          "Intermediate Ocean",
+          "Low Level Ocean",
+          "Deep Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#DDDDDD",
+          "#882255",
+          "#AA4499",
+          "#88CCEE",
+          "#332288"
+        )
+      ) +
+      guides(fill = guide_legend(title = "Carbon Pools")) +
+      ylab("Source Amount (Pg C)") +
+      ggtitle(paste("Earth Pool: Net Change from", start), 
+              subtitle = scenario) +
+      xlab("Year")
+    return(areaGraph)
+  } else {
+    # Plotting in area graph of fraction
+    areaGraph2 <- ggplot(results) +
+      aes(x = year, y = source_fraction, fill = source_name) +
+      geom_area() +
+      scale_fill_manual(
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth",
+          "Atmosphere",
+          "High Level Ocean",
+          "Intermediate Ocean",
+          "Low Level Ocean",
+          "Deep Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#DDDDDD",
+          "#882255",
+          "#AA4499",
+          "#88CCEE",
+          "#332288"
+        )
+      ) +
+      guides(fill = guide_legend(title = "Carbon Pools")) +
+      ylab("Source Fraction") +
+      ggtitle(paste("Earth Pool: Net Change from", start), 
+              subtitle = scenario) +
+      xlab("Year")
+    return(areaGraph2)
+  }
+}
+
+
+# Getting plots for all RCPs
+path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
+ini_file_26_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
+ini_file_19_SSP1 <- paste(path, "jay_19_SSP1.ini", sep = "")
+ini_file_26_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
+ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
+
+# RCP 2.6 SSP1
+earth_plot(
+  ini_file_26_SSP1, 2020, 2100,
+  "fraction",  "RCP 2.6 SSP1"
+)
+earth_plot(
+  ini_file_26_SSP1, 2020, 2100,
+  "amount",  "RCP 2.6 SSP1"
+)
+
+# RCP 1.9 SSP1
+earth_plot(
+  ini_file_19_SSP1, 2020, 2100,
+  "fraction",  "RCP 1.9 SSP1"
+)
+earth_plot(
+  ini_file_19_SSP1, 2020, 2100,
+  "amount",  "RCP 1.9 SSP1"
+)
+
+# RCP 2.6 SSP5
+earth_plot(
+  ini_file_26_SSP5, 2020, 2100,
+  "fraction",  "RCP 2.6 SSP5"
+)
+earth_plot(
+  ini_file_26_SSP5, 2020, 2100,
+  "amount",  "RCP 2.6 SSP5"
+)
+
+# RCP 1.9 SSP5
+earth_plot(
+  ini_file_19_SSP5, 2020, 2100,
+  "fraction",  "RCP 1.9 SSP5"
+)
+earth_plot(
+  ini_file_19_SSP5, 2020, 2100,
+  "amount",  "RCP 1.9 SSP5"
+)

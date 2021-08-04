@@ -151,47 +151,47 @@ tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
 
 # Getting plots for all RCPs
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
-ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
-ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep = "")
-ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep = "")
-ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
+ini_file_26_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
+ini_file_19_SSP1 <- paste(path, "jay_19_SSP1.ini", sep = "")
+ini_file_26_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
+ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
 
-# SSP1
+# RCP 2.6 SSP1
 tracking_plot(
-  ini_file_SSP1, 2005, 2100,
+  ini_file_26_SSP1, 2005, 2100,
   "fraction", "all", "RCP 2.6 SSP1"
 )
 tracking_plot(
-  ini_file_SSP1, 2005, 2100,
+  ini_file_26_SSP1, 2005, 2100,
   "amount", "all", "RCP 2.6 SSP1"
 )
 
-# SSP2
+# RCP 1.9 SSP1
 tracking_plot(
-  ini_file_SSP2, 2005, 2100,
-  "fraction", "all", "RCP 2.6 SSP2"
+  ini_file_19_SSP1, 2005, 2100,
+  "fraction", "all", "RCP 1.9 SSP1"
 )
 tracking_plot(
-  ini_file_SSP2, 2005, 2100,
-  "amount", "all", "RCP 2.6 SSP2"
-)
-
-# SSP4
-tracking_plot(
-  ini_file_SSP4, 2005, 2100,
-  "fraction", "all", "RCP 2.6 SSP4"
-)
-tracking_plot(
-  ini_file_SSP4, 2005, 2100,
-  "amount", "all", "RCP 2.6 SSP4"
+  ini_file_19_SSP1, 2005, 2100,
+  "amount", "all", "RCP 1.9 SSP1"
 )
 
-# SSP5
+# RCP 2.6 SSP5
 tracking_plot(
-  ini_file_SSP5, 2005, 2100,
+  ini_file_26_SSP5, 2005, 2100,
   "fraction", "all", "RCP 2.6 SSP5"
 )
 tracking_plot(
-  ini_file_SSP5, 2005, 2100,
+  ini_file_26_SSP5, 2005, 2100,
   "amount", "all", "RCP 2.6 SSP5"
+)
+
+# RCP 1.9 SSP5
+tracking_plot(
+  ini_file_19_SSP5, 2005, 2100,
+  "fraction", "all", "RCP 1.9 SSP5"
+)
+tracking_plot(
+  ini_file_19_SSP5, 2005, 2100,
+  "amount", "all", "RCP 1.9 SSP5"
 )

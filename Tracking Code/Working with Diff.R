@@ -99,23 +99,23 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
 
 # Running RCP 2.6 and RCP 4.5
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
-ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
-ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep = "")
-ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep = "")
-ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
+ini_file_26_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
+ini_file_19_SSP1 <- paste(path, "jay_19_SSP1.ini", sep = "")
+ini_file_26_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
+ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
 
-# SSP1
-difference_plot(ini_file_SSP1, 2005, 2100, "all", "RCP 2.6 SSP1")
-difference_plot(ini_file_SSP1, 2050, 2100, "earth_c", "RCP 2.6 SSP1")
+# RCP 2.6 SSP1
+difference_plot(ini_file_26_SSP1, 2005, 2100, "all", "RCP 2.6 SSP1")
+difference_plot(ini_file_26_SSP1, 2005, 2100, "earth_c", "RCP 2.6 SSP1")
 
-# SSP2
-difference_plot(ini_file_SSP2, 2005, 2100, "all", "RCP 2.6 SSP2")
-difference_plot(ini_file_SSP2, 2050, 2100, "earth_c", "RCP 2.6 SSP2")
+# RCP 1.9 SSP1
+difference_plot(ini_file_19_SSP1, 2005, 2100, "all", "RCP 1.9 SSP1")
+difference_plot(ini_file_19_SSP1, 2005, 2100, "earth_c", "RCP 1.9 SSP1")
 
-# SSP4
-difference_plot(ini_file_SSP4, 2005, 2100, "all", "RCP 2.6 SSP4")
-difference_plot(ini_file_SSP4, 2050, 2100, "earth_c", "RCP 2.6 SSP4")
+# RCP 2.6 SSP5
+difference_plot(ini_file_26_SSP5, 2005, 2100, "all", "RCP 2.6 SSP5")
+difference_plot(ini_file_26_SSP5, 2005, 2100, "earth_c", "RCP 2.6 SSP5")
 
-# SSP5
-difference_plot(ini_file_SSP5, 2005, 2100, "all", "RCP 2.6 SSP5")
-difference_plot(ini_file_SSP5, 2050, 2100, "earth_c", "RCP 2.6 SSP5")
+# RCP 1.9 SSP5
+difference_plot(ini_file_19_SSP5, 2005, 2100, "all", "RCP 1.9 SSP5")
+difference_plot(ini_file_19_SSP5, 2005, 2100, "earth_c", "RCP 1.9 SSP5")
