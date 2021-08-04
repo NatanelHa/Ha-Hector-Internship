@@ -3,9 +3,15 @@ library(hector)
 library(ggplot2)
 library(dplyr)
 
+path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
+ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep="")
+ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep="")
+ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep="")
+ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep="")
+
 # Establish core
 rcp26 <- system.file("input/hector_rcp26.ini", package = "hector")
-core <- newcore(rcp26, suppresslogging = TRUE)
+core <- newcore(ini_file_SSP2, suppresslogging = TRUE)
 
 # Run core
 run(core)
@@ -16,7 +22,8 @@ results <- get_tracking_data(core)
 # Calculating source anount
 results %>%
   filter(pool_name == "earth_c") %>%
-  filter(year >= 2073) %>%
+  filter(year >= 2005) %>%
+  filter(year <= 2100) %>%
   mutate(source_amount = source_fraction * pool_value) ->
 results
 
@@ -41,7 +48,7 @@ results
 # Plotting in area graph of amount
 areaGraph <- ggplot(results) +
   aes(x = year, y = source_amount, fill = source_name) +
-  geom_bar(stat = "identity") +
+  geom_area() +
   scale_fill_manual(
     labels = c(
       "Detritus",
@@ -66,17 +73,16 @@ areaGraph <- ggplot(results) +
       "#332288"
     )
   ) +
-  geom_col(width = 1) +
   guides(fill = guide_legend(title = "Carbon Pools")) +
   ylab("Source Amount (Pg C)") +
-  ggtitle("Earth Pool (Net Change from 2073)") +
+  ggtitle("Earth Pool (Net Change from 2005)") +
   xlab("Year")
 areaGraph
 
 # Plotting in area graph of fraction
 areaGraph2 <- ggplot(results) +
   aes(x = year, y = source_fraction, fill = source_name) +
-  geom_bar(stat = "identity") +
+  geom_area() +
   scale_fill_manual(
     labels = c(
       "Detritus",
@@ -101,9 +107,11 @@ areaGraph2 <- ggplot(results) +
       "#332288"
     )
   ) +
-  geom_col(width = 1) +
   guides(fill = guide_legend(title = "Carbon Pools")) +
   ylab("Source Fraction") +
-  ggtitle("Earth Pool fraction (Net Change from 2073)") +
+  ggtitle("Earth Pool fraction (Net Change from 2005)") +
   xlab("Year")
 areaGraph2
+
+
+

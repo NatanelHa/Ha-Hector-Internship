@@ -50,7 +50,7 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
   }
   areaGraph <- ggplot(td) +
     aes(x = year, y = differ, fill = source_name) +
-    geom_bar(stat = "identity") +
+    geom_area() +
     facet_wrap(~pool_namef,
       scales = "free_y",
       labeller = labeller(pool_namef = c(
@@ -87,7 +87,6 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
       "#88CCEE",
       "#332288"
     )) +
-    geom_col(width = 1) +
     guides(fill = guide_legend(title = "Carbon Pools")) +
     ylab("Change from Previous Year (Pg C)") +
     ggtitle(title) +
@@ -97,7 +96,25 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
 }
 
 # Running RCP 2.6 and RCP 4.5
-rcp26 <- system.file("input/hector_rcp26.ini", package = "hector")
-difference_plot(rcp26, 2000, 2100, "all", "RCP 2.6")
-difference_plot(rcp26, 2050, 2300, "earth_c", "RCP 2.6")
-difference_plot(rcp26, 2050, 2150, "earth_c", "RCP 2.6")
+path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
+ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep="")
+ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep="")
+ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep="")
+ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep="")
+
+#SSP1
+difference_plot(ini_file_SSP1, 2005, 2100, "all", "RCP 2.6 SSP1")
+difference_plot(ini_file_SSP1, 2050, 2100, "earth_c", "RCP 2.6 SSP1")
+
+#SSP2
+difference_plot(ini_file_SSP2, 2005, 2100, "all", "RCP 2.6 SSP2")
+difference_plot(ini_file_SSP2, 2050, 2100, "earth_c", "RCP 2.6 SSP2")
+
+#SSP4
+difference_plot(ini_file_SSP4, 2005, 2100, "all", "RCP 2.6 SSP4")
+difference_plot(ini_file_SSP4, 2050, 2100, "earth_c", "RCP 2.6 SSP4")
+
+#SSP5
+difference_plot(ini_file_SSP5, 2005, 2100, "all", "RCP 2.6 SSP5")
+difference_plot(ini_file_SSP5, 2050, 2100, "earth_c", "RCP 2.6 SSP5")
+
