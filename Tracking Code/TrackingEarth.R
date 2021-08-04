@@ -4,10 +4,10 @@ library(ggplot2)
 library(dplyr)
 
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
-ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep="")
-ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep="")
-ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep="")
-ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep="")
+ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
+ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep = "")
+ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep = "")
+ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
 
 # Establish core
 rcp26 <- system.file("input/hector_rcp26.ini", package = "hector")
@@ -112,6 +112,3 @@ areaGraph2 <- ggplot(results) +
   ggtitle("Earth Pool fraction (Net Change from 2005)") +
   xlab("Year")
 areaGraph2
-
-
-

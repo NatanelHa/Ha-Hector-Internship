@@ -10,7 +10,7 @@ data <- readr::read_csv(paste(path,
   sep = ""
 ))
 # setting scenario
-scenario <- "SSP1-2p6-DACCS-3pctHR"
+scenario <- "SSP5-1p9-DACCS-3pctHR"
 
 # Filtering data
 data %>%
