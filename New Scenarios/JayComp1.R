@@ -1,21 +1,7 @@
-#Importing Libraries
-library(hector)
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-library(ggrepel)
-
-#Set Theme
-theme_set(theme_bw())
-
-## Basic Run
-#Configuring INI File
-ini_file_norm <- system.file("input", "hector_rcp26.ini", package = "hector")
-path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
-ini_file_SSP1 <- paste(path, "jay_19_SSP1.ini", sep="")
-ini_file_SSP2 <- paste(path, "jay_19_SSP2.ini", sep="")
-ini_file_SSP4 <- paste(path, "jay_19_SSP4.ini", sep="")
-ini_file_SSP5 <- paste(path, "jay_19_SSP5.ini", sep="")
+ini_file_SSP1 <- paste(path, "jay_SSP1.ini", sep="")
+ini_file_SSP2 <- paste(path, "jay_SSP2.ini", sep="")
+ini_file_SSP4 <- paste(path, "jay_SSP4.ini", sep="")
+ini_file_SSP5 <- paste(path, "jay_SSP5.ini", sep="")
 
 #Initialize a Hector Instance for each file
 coreNorm <- newcore(ini_file_norm)
@@ -32,7 +18,7 @@ run(coreSSP4)
 run(coreSSP5)
 
 #Retrieve Results
-resultsNorm <- fetchvars(coreNorm, 2005:2100, scenario = "Hector")
+resultsNorm <- fetchvars(coreNorm, 2005:2100, scenario = "Hector 2.6")
 resultsSSP1 <- fetchvars(coreSSP1, 2005:2100, scenario = "SSP1")
 resultsSSP2 <- fetchvars(coreSSP2, 2005:2100, scenario = "SSP2")
 resultsSSP4 <- fetchvars(coreSSP4, 2005:2100, scenario = "SSP4")
@@ -40,7 +26,7 @@ resultsSSP5 <- fetchvars(coreSSP5, 2005:2100, scenario = "SSP5")
 
 #Retrieve fluxes Results 
 result_vars <- c(OCEAN_CFLUX(), LAND_CFLUX(), FFI_EMISSIONS(), DACCS_UPTAKE())
-resultsNormFlux <- fetchvars(coreNorm, 2005:2100, result_vars, scenario = "Hector")
+resultsNormFlux <- fetchvars(coreNorm, 2005:2100, result_vars, scenario = "Hector 2.6")
 resultsSSP1Flux <- fetchvars(coreSSP1, 2005:2100, result_vars, scenario = "SSP1")
 resultsSSP2Flux <- fetchvars(coreSSP2, 2005:2100, result_vars, scenario = "SSP2")
 resultsSSP4Flux <- fetchvars(coreSSP4, 2005:2100, result_vars, scenario = "SSP4")
@@ -62,14 +48,8 @@ resultsFlux %>%
   pivot_longer(3:5, names_to = "variable")->
   resultsFlux
 
-#Label data
-data_label <- results                            
-data_label$label <- NA
-data_label$label[which(data_label$year == max(data_label$year))] <- 
-  data_label$scenario[which(data_label$year == max(data_label$year))]
-
 ##Line Graph
-lineGraphCompare <- ggplot(data_label)+
+lineGraphCompare <- ggplot(results)+
   aes(x = year, y = value, color = scenario) +
   geom_line() +
   facet_wrap(~variable, scales = "free_y", 
@@ -79,9 +59,6 @@ lineGraphCompare <- ggplot(data_label)+
                                               "Tgav" = "Global Mean Temperature (degrees C)")))+
   ylab(NULL)+
   guides(color = guide_legend(title = "Scenario"))+
-  #geom_label_repel(aes(label = label),
-  #                 nudge_x = 1,
-  #                 na.rm = TRUE) +
   scale_color_viridis_d()+
   xlab("Year")
 
@@ -99,8 +76,5 @@ fluxFacetLineCompare <- ggplot(resultsFlux)+
   scale_color_viridis_d()+
   xlab("Year")
 
-#Comparing RCPs
 lineGraphCompare
 fluxFacetLineCompare
-
-
