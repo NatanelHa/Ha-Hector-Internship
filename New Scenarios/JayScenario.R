@@ -17,8 +17,8 @@ data %>%
   filter(Region == "World") %>%
   filter(Variable == "Emissions|CO2|Energy and Industrial Processes" |
     Variable == "Emissions|CO2|AFOLU" |
-    Variable == "Carbon Sequestration|Direct Air Capture" |
-    Variable == "Carbon Sequestration|CCS") %>%
+    Variable == "Carbon Sequestration|Direct Air Capture") %>%
+    #Variable == "Carbon Sequestration|CCS") %>%
   filter(Scenario == scenario) %>%
   select(-Model, -Unit, -Scenario, -Region) ->
 data
@@ -37,8 +37,8 @@ data %>%
   pivot_wider(names_from = Variable) %>%
   rename(ffi_emissions_with_negative = "Emissions|CO2|Energy and Industrial Processes") %>%
   rename(luc_emissions_with_negative = "Emissions|CO2|AFOLU") %>%
-  rename(antiemissionsDAC = "Carbon Sequestration|Direct Air Capture") %>%
-  rename(antiemissionsCCS = "Carbon Sequestration|CCS") ->
+  rename(antiemissionsDAC = "Carbon Sequestration|Direct Air Capture") ->
+  #rename(antiemissionsCCS = "Carbon Sequestration|CCS") ->
 data
 
 data$ffi_emissions_with_negative <- na.approx(data$ffi_emissions_with_negative, data$Years) / 3670
@@ -47,11 +47,10 @@ data$luc_emissions_with_negative <- na.approx(data$luc_emissions_with_negative, 
 
 data$antiemissionsDAC <- na.approx(data$antiemissionsDAC, data$Years) / 3670
 
-data$antiemissionsCCS <- na.approx(data$antiemissionsCCS, data$Years) / 3670
+#data$antiemissionsCCS <- na.approx(data$antiemissionsCCS, data$Years) / 3670
 
 data %>%
-  mutate(ffi_emissions = ffi_emissions_with_negative + antiemissionsDAC 
-          + luc_emissions_with_negative) %>%
+  mutate(ffi_emissions = ffi_emissions_with_negative + antiemissionsDAC) %>%
   mutate(luc_emissions = luc_emissions_with_negative) %>%
   mutate(daccs_uptake = antiemissionsDAC) %>%
   select(Years, ffi_emissions, daccs_uptake, luc_emissions) ->
