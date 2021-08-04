@@ -65,10 +65,21 @@ tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
         ))
       ) +
       scale_fill_manual(
+        limits = c(
+          "detritus_c_global",
+          "veg_c_global",
+          "soil_c_global",
+          "earth_c",
+          "atmos_c",
+          "HL",
+          "intermediate",
+          "LL",
+          "deep"
+        ),
         labels = c(
           "Detritus",
-          "Vegetation",
-          "Soil",
+         "Vegetation",
+        "Soil",
           "Earth",
           "Atmosphere",
           "High Level Ocean",
@@ -113,6 +124,17 @@ tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
         ))
       ) +
       scale_fill_manual(
+        limits = c(
+          "detritus_c_global",
+          "veg_c_global",
+          "soil_c_global",
+          "earth_c",
+          "atmos_c",
+          "HL",
+          "intermediate",
+          "LL",
+          "deep"
+        ),
         labels = c(
           "Detritus",
           "Vegetation",
