@@ -210,7 +210,7 @@ tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
 #### RCP 2.6 SSP1
 ```{r frac26s1, echo=FALSE}
 tracking_plot(
-  ini_file_26_SSP1, 2005, 2100,
+  ini_file_26_SSP1, 2020, 2100,
   "fraction", "all", "RCP 2.6 SSP1"
 )
 ```
@@ -219,7 +219,7 @@ tracking_plot(
 #### RCP 2.6 SSP5
 ```{r frac26s5, echo=FALSE}
 tracking_plot(
-  ini_file_26_SSP5, 2005, 2100,
+  ini_file_26_SSP5, 2020, 2100,
   "fraction", "all", "RCP 2.6 SSP5"
 )
 ```
@@ -227,7 +227,7 @@ tracking_plot(
 #### RCP 1.9 SSP1
 ```{r frac19s1, echo=FALSE}
 tracking_plot(
-  ini_file_19_SSP1, 2005, 2100,
+  ini_file_19_SSP1, 2020, 2100,
   "fraction", "all", "RCP 1.9 SSP1"
 )
 ```
@@ -235,7 +235,7 @@ tracking_plot(
 #### RCP 1.9 SSP5
 ```{r frac19s5, echo=FALSE}
 tracking_plot(
-  ini_file_19_SSP5, 2005, 2100,
+  ini_file_19_SSP5, 2020, 2100,
   "fraction", "all", "RCP 1.9 SSP5"
 )
 ```
@@ -245,7 +245,7 @@ tracking_plot(
 #### RCP 2.6 SSP1
 ```{r am26s1, echo=FALSE}
 tracking_plot(
-  ini_file_26_SSP1, 2005, 2100,
+  ini_file_26_SSP1, 2020, 2100,
   "amount", "all", "RCP 2.6 SSP1"
 )
 ```
@@ -254,7 +254,7 @@ tracking_plot(
 #### RCP 2.6 SSP5
 ```{r am26s5, echo=FALSE}
 tracking_plot(
-  ini_file_26_SSP5, 2005, 2100,
+  ini_file_26_SSP5, 2020, 2100,
   "amount", "all", "RCP 2.6 SSP5"
 )
 ```
@@ -262,7 +262,7 @@ tracking_plot(
 #### RCP 1.9 SSP1
 ```{r am19s1, echo=FALSE}
 tracking_plot(
-  ini_file_19_SSP1, 2005, 2100,
+  ini_file_19_SSP1, 2020, 2100,
   "amount", "all", "RCP 1.9 SSP1"
 )
 ```
@@ -270,7 +270,7 @@ tracking_plot(
 #### RCP 1.9 SSP5
 ```{r am19s5, echo=FALSE}
 tracking_plot(
-  ini_file_19_SSP5, 2005, 2100,
+  ini_file_19_SSP5, 2020, 2100,
   "amount", "all", "RCP 1.9 SSP5"
 )
 ```
@@ -415,7 +415,7 @@ earth_plot <- function(ini_file, start, stop, type, scenario) {
 #### RCP 2.6 SSP1
 ```{r earth_frac26s1, echo=FALSE}
 earth_plot(
-  ini_file_26_SSP1, 2005, 2100,
+  ini_file_26_SSP1, 2020, 2100,
   "fraction", "RCP 2.6 SSP1"
 )
 ```
@@ -424,7 +424,7 @@ earth_plot(
 #### RCP 2.6 SSP5
 ```{r earth_frac26s5, echo=FALSE}
 earth_plot(
-  ini_file_26_SSP5, 2005, 2100,
+  ini_file_26_SSP5, 2020, 2100,
   "fraction", "RCP 2.6 SSP5"
 )
 ```
@@ -432,7 +432,7 @@ earth_plot(
 #### RCP 1.9 SSP1
 ```{r earth_frac19s1, echo=FALSE}
 earth_plot(
-  ini_file_19_SSP1, 2005, 2100,
+  ini_file_19_SSP1, 2020, 2100,
   "fraction", "RCP 1.9 SSP1"
 )
 ```
@@ -440,7 +440,7 @@ earth_plot(
 #### RCP 1.9 SSP5
 ```{r earth_frac19s5, echo=FALSE}
 earth_plot(
-  ini_file_19_SSP5, 2005, 2100,
+  ini_file_19_SSP5, 2020, 2100,
   "fraction", "RCP 1.9 SSP5"
 )
 ```
@@ -450,7 +450,7 @@ earth_plot(
 #### RCP 2.6 SSP1
 ```{r earth_am26s1, echo=FALSE}
 earth_plot(
-  ini_file_26_SSP1, 2005, 2100,
+  ini_file_26_SSP1, 2020, 2100,
   "amount", "RCP 2.6 SSP1"
 )
 ```
@@ -459,7 +459,7 @@ earth_plot(
 #### RCP 2.6 SSP5
 ```{r earth_am26s5, echo=FALSE}
 earth_plot(
-  ini_file_26_SSP5, 2005, 2100,
+  ini_file_26_SSP5, 2020, 2100,
   "amount", "RCP 2.6 SSP5"
 )
 ```
@@ -467,7 +467,7 @@ earth_plot(
 #### RCP 1.9 SSP1
 ```{r earth_am19s1, echo=FALSE}
 earth_plot(
-  ini_file_19_SSP1, 2005, 2100,
+  ini_file_19_SSP1, 2020, 2100,
   "amount", "RCP 1.9 SSP1"
 )
 ```
@@ -475,7 +475,7 @@ earth_plot(
 #### RCP 1.9 SSP5
 ```{r earth_am19s5, echo=FALSE}
 earth_plot(
-  ini_file_19_SSP5, 2005, 2100,
+  ini_file_19_SSP5, 2020, 2100,
   "amount", "RCP 1.9 SSP5"
 )
 ```
@@ -590,43 +590,43 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
 ### Difference Plots {.tabset}
 #### RCP 2.6 SSP1
 ```{r dif26s1, echo=FALSE}
-difference_plot(ini_file_26_SSP1, 2005, 2100, "all", "RCP 2.6 SSP1")
+difference_plot(ini_file_26_SSP1, 2020, 2100, "all", "RCP 2.6 SSP1")
 ```
 
 #### RCP 2.6 SSP5
 ```{r dif26s5, echo=FALSE}
-difference_plot(ini_file_26_SSP5, 2005, 2100, "all", "RCP 2.6 SSP5")
+difference_plot(ini_file_26_SSP5, 2020, 2100, "all", "RCP 2.6 SSP5")
 ```
 
 #### RCP 1.9 SSP1
 ```{r dif19s1, echo=FALSE}
-difference_plot(ini_file_19_SSP1, 2005, 2100, "all", "RCP 1.9 SSP1")
+difference_plot(ini_file_19_SSP1, 2020, 2100, "all", "RCP 1.9 SSP1")
 ```
 
 #### RCP 1.9 SSP5
 ```{r dif19s5, echo=FALSE}
-difference_plot(ini_file_19_SSP5, 2005, 2100, "all", "RCP 1.9 SSP5")
+difference_plot(ini_file_19_SSP5, 2020, 2100, "all", "RCP 1.9 SSP5")
 ```
 
 ### Difference Earth Pool {.tabset}
 #### RCP 2.6 SSP1
 ```{r earthDif26s1, echo=FALSE}
-difference_plot(ini_file_26_SSP1, 2005, 2100, "earth_c", "RCP 2.6 SSP1")
+difference_plot(ini_file_26_SSP1, 2020, 2100, "earth_c", "RCP 2.6 SSP1")
 ```
 
 #### RCP 2.6 SSP5
 ```{r earthDif26s5, echo=FALSE}
-difference_plot(ini_file_26_SSP5, 2005, 2100, "earth_c", "RCP 2.6 SSP5")
+difference_plot(ini_file_26_SSP5, 2020, 2100, "earth_c", "RCP 2.6 SSP5")
 ```
 
 #### RCP 1.9 SSP1
 ```{r earthDif19s1, echo=FALSE}
-difference_plot(ini_file_19_SSP1, 2005, 2100, "earth_c", "RCP 1.9 SSP1")
+difference_plot(ini_file_19_SSP1, 2020, 2100, "earth_c", "RCP 1.9 SSP1")
 ```
 
 #### RCP 1.9 SSP5
 ```{r earthDif19s5, echo=FALSE}
-difference_plot(ini_file_19_SSP5, 2005, 2100, "earth_c", "RCP 1.9 SSP5")
+difference_plot(ini_file_19_SSP5, 2020, 2100, "earth_c", "RCP 1.9 SSP5")
 ```
 
 ### Session Info: 
