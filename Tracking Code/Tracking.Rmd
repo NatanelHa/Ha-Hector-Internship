@@ -608,7 +608,7 @@ difference_plot(ini_file_19_SSP1, 2020, 2100, "all", "RCP 1.9 SSP1")
 difference_plot(ini_file_19_SSP5, 2020, 2100, "all", "RCP 1.9 SSP5")
 ```
 
-### Difference Earth Pool {.tabset}
+### Difference in Earth Pool {.tabset}
 #### RCP 2.6 SSP1
 ```{r earthDif26s1, echo=FALSE}
 difference_plot(ini_file_26_SSP1, 2020, 2100, "earth_c", "RCP 2.6 SSP1")
@@ -627,6 +627,27 @@ difference_plot(ini_file_19_SSP1, 2020, 2100, "earth_c", "RCP 1.9 SSP1")
 #### RCP 1.9 SSP5
 ```{r earthDif19s5, echo=FALSE}
 difference_plot(ini_file_19_SSP5, 2020, 2100, "earth_c", "RCP 1.9 SSP5")
+```
+
+### Difference in Atmospheric Pool {.tabset}
+#### RCP 2.6 SSP1
+```{r atmosDif26s1, echo=FALSE}
+difference_plot(ini_file_26_SSP1, 2020, 2100, "atmos_c", "RCP 2.6 SSP1")
+```
+
+#### RCP 2.6 SSP5
+```{r atmosDif26s5, echo=FALSE}
+difference_plot(ini_file_26_SSP5, 2020, 2100, "atmos_c", "RCP 2.6 SSP5")
+```
+
+#### RCP 1.9 SSP1
+```{r atmosDif19s1, echo=FALSE}
+difference_plot(ini_file_19_SSP1, 2020, 2100, "atmos_c", "RCP 1.9 SSP1")
+```
+
+#### RCP 1.9 SSP5
+```{r atmosDif19s5, echo=FALSE}
+difference_plot(ini_file_19_SSP5, 2020, 2100, "atmos_c", "RCP 1.9 SSP5")
 ```
 
 ### Session Info: 
