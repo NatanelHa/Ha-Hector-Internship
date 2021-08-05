@@ -208,7 +208,7 @@ tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
 ### Basic Fraction Plots {.tabset}
 
 #### RCP 2.6 SSP1
-```{r frac26s1, echo=FALSE}
+```{r frac26s1, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_26_SSP1, 2020, 2100,
   "fraction", "all", "RCP 2.6 SSP1"
@@ -217,7 +217,7 @@ tracking_plot(
 
 
 #### RCP 2.6 SSP5
-```{r frac26s5, echo=FALSE}
+```{r frac26s5, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_26_SSP5, 2020, 2100,
   "fraction", "all", "RCP 2.6 SSP5"
@@ -225,7 +225,7 @@ tracking_plot(
 ```
 
 #### RCP 1.9 SSP1
-```{r frac19s1, echo=FALSE}
+```{r frac19s1, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_19_SSP1, 2020, 2100,
   "fraction", "all", "RCP 1.9 SSP1"
@@ -233,7 +233,7 @@ tracking_plot(
 ```
 
 #### RCP 1.9 SSP5
-```{r frac19s5, echo=FALSE}
+```{r frac19s5, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_19_SSP5, 2020, 2100,
   "fraction", "all", "RCP 1.9 SSP5"
@@ -243,7 +243,7 @@ tracking_plot(
 ### Basic Plots of Amounts of Carbon {.tabset}
 
 #### RCP 2.6 SSP1
-```{r am26s1, echo=FALSE}
+```{r am26s1, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_26_SSP1, 2020, 2100,
   "amount", "all", "RCP 2.6 SSP1"
@@ -252,7 +252,7 @@ tracking_plot(
 
 
 #### RCP 2.6 SSP5
-```{r am26s5, echo=FALSE}
+```{r am26s5, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_26_SSP5, 2020, 2100,
   "amount", "all", "RCP 2.6 SSP5"
@@ -260,7 +260,7 @@ tracking_plot(
 ```
 
 #### RCP 1.9 SSP1
-```{r am19s1, echo=FALSE}
+```{r am19s1, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_19_SSP1, 2020, 2100,
   "amount", "all", "RCP 1.9 SSP1"
@@ -268,7 +268,7 @@ tracking_plot(
 ```
 
 #### RCP 1.9 SSP5
-```{r am19s5, echo=FALSE}
+```{r am19s5, echo=FALSE, fig.width=10, fig.height=6}
 tracking_plot(
   ini_file_19_SSP5, 2020, 2100,
   "amount", "all", "RCP 1.9 SSP5"
@@ -325,33 +325,21 @@ earth_plot <- function(ini_file, start, stop, type, scenario) {
           "veg_c_global",
           "soil_c_global",
           "earth_c",
-          "atmos_c",
-          "HL",
-          "intermediate",
-          "LL",
-          "deep"
+          "atmos_c"
         ),
         labels = c(
           "Detritus",
           "Vegetation",
           "Soil",
           "Earth",
-          "Atmosphere",
-          "High Level Ocean",
-          "Intermediate Ocean",
-          "Low Level Ocean",
-          "Deep Ocean"
+          "Atmosphere"
         ),
         values = c(
           "#DDCC77",
           "#999933",
           "#44AA99",
           "#117733",
-          "#DDDDDD",
-          "#882255",
-          "#AA4499",
-          "#88CCEE",
-          "#332288"
+          "#DDDDDD"
         )
       ) +
       guides(fill = guide_legend(title = "Carbon Pools")) +
@@ -371,33 +359,21 @@ earth_plot <- function(ini_file, start, stop, type, scenario) {
           "veg_c_global",
           "soil_c_global",
           "earth_c",
-          "atmos_c",
-          "HL",
-          "intermediate",
-          "LL",
-          "deep"
+          "atmos_c"
         ),
         labels = c(
           "Detritus",
           "Vegetation",
           "Soil",
           "Earth",
-          "Atmosphere",
-          "High Level Ocean",
-          "Intermediate Ocean",
-          "Low Level Ocean",
-          "Deep Ocean"
+          "Atmosphere"
         ),
         values = c(
           "#DDCC77",
           "#999933",
           "#44AA99",
           "#117733",
-          "#DDDDDD",
-          "#882255",
-          "#AA4499",
-          "#88CCEE",
-          "#332288"
+          "#DDDDDD"
         )
       ) +
       guides(fill = guide_legend(title = "Carbon Pools")) +
@@ -587,6 +563,100 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
 }
 ```
 
+```{r diffFunc2, include=FALSE}
+# Tracking plot Function
+difference_plot2 <- function(ini_file, start, stop, pool, title) {
+  core <- newcore(ini_file, suppresslogging = TRUE)
+
+  # run core
+  run(core)
+
+  # Get td
+  td <- get_tracking_data(core)
+
+  # Calculating Source amount and Diff
+  td %>%
+    filter(pool_name != "Diff") %>%
+    mutate(source_amount = source_fraction * pool_value) %>%
+    group_by(pool_name, source_name) %>%
+    mutate(differ = source_amount - lag(source_amount)) ->
+  td
+
+  # Creating better labels
+  td$pool_namef <- factor(td$pool_name, levels = c(
+    "detritus_c_global",
+    "veg_c_global",
+    "soil_c_global",
+    "earth_c",
+    "atmos_c",
+    "HL",
+    "intermediate",
+    "LL",
+    "deep"
+  ))
+
+  # Filtering out years and NA
+  td %>%
+    filter(year >= start) %>%
+    filter(year <= stop) %>%
+    filter(!is.na(differ)) ->
+  td
+
+  # A plot of all pools
+  if (pool != "all") {
+    td %>%
+      filter(pool_name == pool) ->
+    td
+  }
+  areaGraph <- ggplot(td) +
+    aes(x = year, y = differ, fill = source_name) +
+    geom_area() +
+    facet_wrap(~pool_namef,
+      scales = "free_y",
+      labeller = labeller(pool_namef = c(
+        "detritus_c_global" = "Detritus",
+        "veg_c_global" = "Vegetation",
+        "soil_c_global" = "Soil",
+        "earth_c" = "Earth",
+        "atmos_c" = "Atmosphere",
+        "HL" = "High Level Ocean",
+        "intermediate" = "Intermediate Ocean",
+        "LL" = "Low Level Ocean",
+        "deep" = "Deep Ocean"
+      ))
+    ) +
+    scale_fill_manual(
+      limits = c(
+        "detritus_c_global",
+        "veg_c_global",
+        "soil_c_global",
+        "earth_c",
+        "atmos_c"
+      ),
+      labels = c(
+        "Detritus",
+        "Vegetation",
+        "Soil",
+        "Earth",
+        "Atmosphere"
+      ),
+      values = c(
+        "#DDCC77",
+        "#999933",
+        "#44AA99",
+        "#117733",
+        "#DDDDDD"
+      )
+    ) +
+    guides(fill = guide_legend(title = "Carbon Pools")) +
+    ylab("Change from Previous Year (Pg C)") +
+    ggtitle(title) +
+    xlab("Year")
+
+  areaGraph
+}
+```
+
 ### Difference Plots {.tabset}
 #### RCP 2.6 SSP1
 ```{r dif26s1, echo=FALSE}
@@ -611,43 +681,43 @@ difference_plot(ini_file_19_SSP5, 2020, 2100, "all", "RCP 1.9 SSP5")
 ### Difference in Earth Pool {.tabset}
 #### RCP 2.6 SSP1
 ```{r earthDif26s1, echo=FALSE}
-difference_plot(ini_file_26_SSP1, 2020, 2100, "earth_c", "RCP 2.6 SSP1")
+difference_plot2(ini_file_26_SSP1, 2020, 2100, "earth_c", "RCP 2.6 SSP1")
 ```
 
 #### RCP 2.6 SSP5
 ```{r earthDif26s5, echo=FALSE}
-difference_plot(ini_file_26_SSP5, 2020, 2100, "earth_c", "RCP 2.6 SSP5")
+difference_plot2(ini_file_26_SSP5, 2020, 2100, "earth_c", "RCP 2.6 SSP5")
 ```
 
 #### RCP 1.9 SSP1
 ```{r earthDif19s1, echo=FALSE}
-difference_plot(ini_file_19_SSP1, 2020, 2100, "earth_c", "RCP 1.9 SSP1")
+difference_plot2(ini_file_19_SSP1, 2020, 2100, "earth_c", "RCP 1.9 SSP1")
 ```
 
 #### RCP 1.9 SSP5
 ```{r earthDif19s5, echo=FALSE}
-difference_plot(ini_file_19_SSP5, 2020, 2100, "earth_c", "RCP 1.9 SSP5")
+difference_plot2(ini_file_19_SSP5, 2020, 2100, "earth_c", "RCP 1.9 SSP5")
 ```
 
 ### Difference in Atmospheric Pool {.tabset}
 #### RCP 2.6 SSP1
 ```{r atmosDif26s1, echo=FALSE}
-difference_plot(ini_file_26_SSP1, 2020, 2100, "atmos_c", "RCP 2.6 SSP1")
+difference_plot2(ini_file_26_SSP1, 2020, 2100, "atmos_c", "RCP 2.6 SSP1")
 ```
 
 #### RCP 2.6 SSP5
 ```{r atmosDif26s5, echo=FALSE}
-difference_plot(ini_file_26_SSP5, 2020, 2100, "atmos_c", "RCP 2.6 SSP5")
+difference_plot2(ini_file_26_SSP5, 2020, 2100, "atmos_c", "RCP 2.6 SSP5")
 ```
 
 #### RCP 1.9 SSP1
 ```{r atmosDif19s1, echo=FALSE}
-difference_plot(ini_file_19_SSP1, 2020, 2100, "atmos_c", "RCP 1.9 SSP1")
+difference_plot2(ini_file_19_SSP1, 2020, 2100, "atmos_c", "RCP 1.9 SSP1")
 ```
 
 #### RCP 1.9 SSP5
 ```{r atmosDif19s5, echo=FALSE}
-difference_plot(ini_file_19_SSP5, 2020, 2100, "atmos_c", "RCP 1.9 SSP5")
+difference_plot2(ini_file_19_SSP5, 2020, 2100, "atmos_c", "RCP 1.9 SSP5")
 ```
 
 ### Session Info: 

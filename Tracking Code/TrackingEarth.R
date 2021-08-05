@@ -50,33 +50,21 @@ earth_plot <- function(ini_file, start, stop, type, scenario) {
           "veg_c_global",
           "soil_c_global",
           "earth_c",
-          "atmos_c",
-          "HL",
-          "intermediate",
-          "LL",
-          "deep"
+          "atmos_c"
         ),
         labels = c(
           "Detritus",
           "Vegetation",
           "Soil",
           "Earth",
-          "Atmosphere",
-          "High Level Ocean",
-          "Intermediate Ocean",
-          "Low Level Ocean",
-          "Deep Ocean"
+          "Atmosphere"
         ),
         values = c(
           "#DDCC77",
           "#999933",
           "#44AA99",
           "#117733",
-          "#DDDDDD",
-          "#882255",
-          "#AA4499",
-          "#88CCEE",
-          "#332288"
+          "#DDDDDD"
         )
       ) +
       guides(fill = guide_legend(title = "Carbon Pools")) +
@@ -96,33 +84,21 @@ earth_plot <- function(ini_file, start, stop, type, scenario) {
           "veg_c_global",
           "soil_c_global",
           "earth_c",
-          "atmos_c",
-          "HL",
-          "intermediate",
-          "LL",
-          "deep"
+          "atmos_c"
         ),
         labels = c(
           "Detritus",
           "Vegetation",
           "Soil",
           "Earth",
-          "Atmosphere",
-          "High Level Ocean",
-          "Intermediate Ocean",
-          "Low Level Ocean",
-          "Deep Ocean"
+          "Atmosphere"
         ),
         values = c(
           "#DDCC77",
           "#999933",
           "#44AA99",
           "#117733",
-          "#DDDDDD",
-          "#882255",
-          "#AA4499",
-          "#88CCEE",
-          "#332288"
+          "#DDDDDD"
         )
       ) +
       guides(fill = guide_legend(title = "Carbon Pools")) +
