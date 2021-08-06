@@ -4,6 +4,7 @@ author: "Natanel Ha"
 date: "8/4/2021"
 output: 
   html_document:
+    code_folding: hide
     toc: true
     toc_depth: 3
     toc_float: 
@@ -17,15 +18,22 @@ emissions scenarios (constructed with Jay Fuhrman's data) using the simple
 climate model Hector's tracking feature. 
 
 ### Importing Libraries 
-```{r importing, message=FALSE, warning=FALSE}
+```{r importing, message=FALSE, warning=FALSE, class.source = 'fold-show'}
 library(hector)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
 ```
 
-### Establishing ini files
-```{r inifiles, message=FALSE, warning=FALSE}
+### Establishing INI files
+In all the INI files, the year tracking starts is 2020. I chose this year
+because in all the scenarios DACCS starts in 2021, and 2020 seemed 
+like a reasonable baseline. 
+
+I chose 4 our of the 8 scenarios to focus on. SSP1 was chosen as a baseline 
+run, and SSP5 had the most negative emissions through DACCS so I chose those 
+two.
+```{r inifiles, message=FALSE, warning=FALSE, class.source = 'fold-show'}
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
 ini_file_26_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
 ini_file_19_SSP1 <- paste(path, "jay_19_SSP1.ini", sep = "")
@@ -35,6 +43,9 @@ ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
 
 
 ## Basic Tracking Plots
+Creating basic plots that display the tracking results, in terms of the
+fraction of carbon that originated in each pool and the amount of carbon
+that originated in each pool. 
 ```{r basicTrackingFunction}
 # tracking plot function
 tracking_plot <- function(ini_file, start, stop, graph_type, pool, title) {
@@ -277,6 +288,10 @@ tracking_plot(
 
 
 ## Earth Pool Examination 
+In order to see where the Negative Emissions were being pulled from, I examined
+the Earth Pool in further detail. Since the Earth pool was so large and it was 
+hard to see what other pools were inside it, I decided to look at net
+change from 2020. 
 ```{r earthFunc}
 earth_plot <- function(ini_file, start, stop, type, scenario) {
   # Establish core
@@ -457,6 +472,9 @@ earth_plot(
 ```
 
 ## Function for increase in each pool
+For further examination of the tracking, I decided to look at the rates 
+at which each of the pools were changing. I calculated this by looking
+at the increase or decrease from the previous year
 ```{r diffFunc}
 # Tracking plot Function
 difference_plot <- function(ini_file, start, stop, pool, title) {

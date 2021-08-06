@@ -36,14 +36,14 @@ data %>%
   pivot_wider(names_from = Variable) %>%
   rename(ffi_emissions_with_negative = "Emissions|CO2|Energy and Industrial Processes") %>%
   rename(luc_emissions = "Emissions|CO2|AFOLU") -> #%>%
-  #rename(daccs_uptake = "Carbon Sequestration|Direct Air Capture") ->
+  rename(daccs_uptake = "Carbon Sequestration|Direct Air Capture") ->
 data
 
 data$ffi_emissions_with_negative <- na.approx(data$ffi_emissions_with_negative, data$Years) / 3670
 
 data$luc_emissions <- na.approx(data$luc_emissions, data$Years) / 3670
 
-#data$daccs_uptake <- na.approx(data$daccs_uptake, data$Years) / 3670
+data$daccs_uptake <- na.approx(data$daccs_uptake, data$Years) / 3670
 
 data %>%
   mutate(ffi_emissions = ffi_emissions_with_negative) %>% # + daccs_uptake) %>%
