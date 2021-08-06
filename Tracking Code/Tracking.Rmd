@@ -471,6 +471,124 @@ earth_plot(
 )
 ```
 
+
+## Split Earth Pool
+Splitting Earth pool with fossil fuel emissions to take account for the 
+earth pool going in vs the earth pool going out
+
+```{r ffi}
+ffi_results <- function(ini_file, start, stop, scenario) {
+  # Establish core
+  core <- newcore(ini_file, suppresslogging = TRUE)
+  
+  # Run core
+  run(core)
+  
+  # Get Results
+  results <- get_tracking_data(core)
+  
+  # Calculating source anount
+  results %>%
+    filter(pool_name == "earth_c") %>%
+    filter(year >= start) %>%
+    filter(year <= stop) %>%
+    mutate(source_amount = source_fraction * pool_value) ->
+    results
+  
+  #Get ffi emissions
+  ffi_emissions <- fetchvars(core, 2020:2100, FFI_EMISSIONS())
+  ffi_emissions$value<-cumsum(ffi_emissions$value)
+  
+  # The year negative emissions starts
+  earth_start <-
+    results %>%
+    filter(source_name == "earth_c")
+  
+  earth_start_carbon <-
+    first(earth_start$source_amount)
+  
+  earth_start_fraction <-
+    first(earth_start$source_fraction)
+  
+  # Calculating difference from start
+  results %>%
+    mutate(source_amount = source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
+    mutate(source_fraction = source_fraction - earth_start_fraction * (source_name == "earth_c")) ->
+    results
+  
+  ffi_emissions %>%
+    select(value, year)%>%
+    rename("fossil_fuels" = value)->
+    ffi_emissions
+  
+  results %>%
+    right_join(ffi_emissions)%>%
+    select(-pool_value, -source_fraction)%>%
+    pivot_wider(names_from="source_name", values_from="source_amount")%>%
+    mutate(earth_c = earth_c + fossil_fuels) %>%
+    mutate(fossil_fuels = fossil_fuels*-1) %>%
+    pivot_longer(4:13, names_to = "source_name", values_to = "source_amount")->
+  results
+
+  areaGraph <- ggplot(results) +
+    aes(x = year, y = source_amount, fill = source_name) +
+    geom_area() +
+    scale_fill_manual(
+      limits = c(
+        "detritus_c_global",
+        "veg_c_global",
+        "soil_c_global",
+        "earth_c",
+        "fossil_fuels",
+        "atmos_c"
+      ),
+      labels = c(
+        "Detritus",
+        "Vegetation",
+        "Soil",
+        "Earth In",
+        "Earth Out",
+        "Atmosphere"
+      ),
+      values = c(
+        "#DDCC77",
+        "#999933",
+        "#44AA99",
+        "#117733",
+        "#882255",
+        "#DDDDDD"
+      )
+    ) +
+    guides(fill = guide_legend(title = "Carbon Pools")) +
+    ylab("Source Amount (Pg C)") +
+    ggtitle(paste("Earth Pool: Net Change from 2020"), 
+            subtitle = scenario) +
+    xlab("Year")
+  return(areaGraph)
+}
+```
+
+### Split Earth Plots {.tabset}
+#### RCP 2.6 SSP1
+```{r earth_split26s1, echo=FALSE, message=FALSE, warning=FALSE}
+ffi_results(ini_file_26_SSP1, 2020, 2100, "RCP 2.6 SSP1")
+```
+
+#### RCP 2.6 SSP6
+```{r earth_split26s5, echo=FALSE, message=FALSE, warning=FALSE}
+ffi_results(ini_file_26_SSP5, 2020, 2100, "RCP 2.6 SSP5")
+```
+
+#### RCP 1.9 SSP1
+```{r earth_split19s1, echo=FALSE, message=FALSE, warning=FALSE}
+ffi_results(ini_file_19_SSP1, 2020, 2100, "RCP 1.9 SSP1")
+```
+
+#### RCP 1.9 SSP5
+```{r earth_split19s5, echo=FALSE, message=FALSE, warning=FALSE}
+ffi_results(ini_file_19_SSP5, 2020, 2100, "RCP 1.9 SSP5")
+```
+
 ## Function for increase in each pool
 For further examination of the tracking, I decided to look at the rates 
 at which each of the pools were changing. I calculated this by looking
@@ -573,7 +691,7 @@ difference_plot <- function(ini_file, start, stop, pool, title) {
       )
     ) +
     guides(fill = guide_legend(title = "Carbon Pools")) +
-    ylab("Change from Previous Year (Pg C)") +
+    ylab("Change from Previous Year (Pg C/Yr)") +
     ggtitle(title) +
     xlab("Year")
 
@@ -667,7 +785,7 @@ difference_plot2 <- function(ini_file, start, stop, pool, title) {
       )
     ) +
     guides(fill = guide_legend(title = "Carbon Pools")) +
-    ylab("Change from Previous Year (Pg C)") +
+    ylab("Change from Previous Year (Pg C/Yr)") +
     ggtitle(title) +
     xlab("Year")
 
@@ -743,11 +861,6 @@ I then got the results and combined them to make faceted graphs and bar plots.
 I specifically looked at the Earth Pool. 
 
 ```{r compare}
-# Importing libraries
-library(hector)
-library(ggplot2)
-library(dplyr)
-
 # Function to get results
 get_results <- function(ini_file, start, stop, name) {
   # Establish core
@@ -792,12 +905,6 @@ get_results <- function(ini_file, start, stop, name) {
   results
   return(results)
 }
-
-path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
-ini_file_26_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
-ini_file_19_SSP1 <- paste(path, "jay_19_SSP1.ini", sep = "")
-ini_file_26_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
-ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
 
 total_results <-
   rbind(
@@ -888,13 +995,13 @@ First I had to filter the results
 ```{r barFilter}
 total_results %>%
   filter(year == 2100) ->
-total_results
+total_results_2100
 ```
 
 #### Graphs {.tabset}
 ##### Amount of Carbon
 ```{r amountBar}
-amountBar <- ggplot(total_results) +
+amountBar <- ggplot(total_results_2100) +
   aes(x = source_name, y = source_amount, fill = source_name) +
   geom_bar(stat = "identity") +
   facet_wrap(~scenario) +
@@ -932,7 +1039,7 @@ amountBar
 
 ##### Fraction of Pool
 ```{r fracBar}
-fracBar <- ggplot(total_results) +
+fracBar <- ggplot(total_results_2100) +
   aes(x = source_name, y = source_fraction, fill = source_name) +
   geom_bar(stat = "identity") +
   facet_wrap(~scenario) +
@@ -968,6 +1075,41 @@ fracBar <- ggplot(total_results) +
 fracBar
 ```
 
+### Difference Comparison
+```{r diffComp, message=FALSE, warning=FALSE}
+dif <- ggplot(total_results) +
+  aes(x = year, y = differ, fill = source_name) +
+  geom_area() +
+  facet_wrap(~scenario)+
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD"
+    )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Change from Previous Year (Pg C)") +
+  ggtitle("Difference in Earth Pool") +
+  xlab("Year")
+dif
+```
 
 ### Session Info: 
 ```{r sessionInfo, echo=FALSE}
