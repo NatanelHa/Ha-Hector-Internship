@@ -19,7 +19,7 @@ get_results <- function(ini_file, start, stop, name) {
     filter(pool_name == "earth_c") %>%
     filter(year >= start) %>%
     filter(year <= stop) %>%
-    mutate(source_amount = source_fraction * pool_value) ->
+    mutate(unmod_source_amount = source_fraction * pool_value) ->
   results
 
   # Finding earth_c values in start
@@ -29,19 +29,21 @@ get_results <- function(ini_file, start, stop, name) {
     filter(source_name == "earth_c")
 
   earth_start_carbon <-
-    first(earth_start$source_amount)
+    first(earth_start$unmod_source_amount)
 
   earth_start_fraction <-
     first(earth_start$source_fraction)
 
   # Calculating difference from start
   results %>%
-    mutate(source_amount = source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
+    mutate(source_amount = unmod_source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
     mutate(source_fraction = source_fraction - earth_start_fraction * (source_name == "earth_c")) %>%
     mutate(scenario = name) %>%
     filter(source_name == "earth_c" | source_name == "detritus_c_global" 
            | source_name == "atmos_c" |source_name == "soil_c_global" 
-           | source_name == "veg_c_global") ->
+           | source_name == "veg_c_global")%>%
+    group_by(pool_name, source_name) %>%
+    mutate(differ = unmod_source_amount - lag(unmod_source_amount)) ->
   results
   return(results)
 }
@@ -129,10 +131,10 @@ frac
 
 total_results %>%
   filter(year == 2100) ->
-total_results
+total_results_2100
 
 # As Amount
-amountBar <- ggplot(total_results) +
+amountBar <- ggplot(total_results_2100) +
   aes(x = source_name, y = source_amount, fill = source_name) +
   geom_bar(stat = "identity") +
   facet_wrap(~scenario) +
@@ -168,7 +170,7 @@ amountBar <- ggplot(total_results) +
 amountBar
 
 # Plotting in area graph of fraction
-fracBar <- ggplot(total_results) +
+fracBar <- ggplot(total_results_2100) +
   aes(x = source_name, y = source_fraction, fill = source_name) +
   geom_bar(stat = "identity") +
   facet_wrap(~scenario) +
@@ -202,3 +204,38 @@ fracBar <- ggplot(total_results) +
         axis.text.x=element_blank(),
         axis.ticks.x=element_blank())
 fracBar
+
+#Difference
+dif <- ggplot(total_results) +
+  aes(x = year, y = differ, fill = source_name) +
+  geom_area() +
+  facet_wrap(~scenario)+
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD"
+    )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Change from Previous Year (Pg C)") +
+  ggtitle("Difference in Earth Pool") +
+  xlab("Year")
+
+dif
