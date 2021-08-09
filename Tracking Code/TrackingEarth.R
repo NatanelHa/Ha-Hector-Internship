@@ -3,23 +3,33 @@ library(hector)
 library(ggplot2)
 library(dplyr)
 
-earth_plot <- function(ini_file, start, stop, type, scenario) {
-  # Establish core
-  core <- newcore(ini_file, suppresslogging = TRUE)
+# Tracking results
+tracking_results <- function(ini_file, start, stop, scenarioName) {
+  # establish core
+  core <- newcore(ini_file)
 
-  # Run core
+  # run core
   run(core)
 
   # Get Results
-  results <- get_tracking_data(core)
+  results_with_diff <- get_tracking_data(core)
+  results_with_diff
 
-  # Calculating source anount
-  results %>%
-    filter(pool_name == "earth_c") %>%
-    filter(year >= start) %>%
+  # Filter out diff and year
+  td <-
+    results_with_diff %>%
+    filter(pool_name != "Diff") %>%
     filter(year <= stop) %>%
-    mutate(source_amount = source_fraction * pool_value) ->
-  results
+    filter(year >= start) %>%
+    mutate(source_amount = source_fraction * pool_value) %>%
+    mutate(scenario = scenarioName)
+
+  return(td)
+}
+
+earth_calc <- function(ini_file, start, stop, scenario) {
+  results <- tracking_results(ini_file, start, stop, scenario) %>%
+    filter(pool_name == "earth_c")
 
   # Finding earth_c values in start
   # The year negative emissions starts
@@ -38,78 +48,73 @@ earth_plot <- function(ini_file, start, stop, type, scenario) {
     mutate(source_amount = source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
     mutate(source_fraction = source_fraction - earth_start_fraction * (source_name == "earth_c")) ->
   results
-
-  if (type == "amount") {
-    # Plotting in area graph of amount
-    areaGraph <- ggplot(results) +
-      aes(x = year, y = source_amount, fill = source_name) +
-      geom_area() +
-      scale_fill_manual(
-        limits = c(
-          "detritus_c_global",
-          "veg_c_global",
-          "soil_c_global",
-          "earth_c",
-          "atmos_c"
-        ),
-        labels = c(
-          "Detritus",
-          "Vegetation",
-          "Soil",
-          "Earth",
-          "Atmosphere"
-        ),
-        values = c(
-          "#DDCC77",
-          "#999933",
-          "#44AA99",
-          "#117733",
-          "#DDDDDD"
-        )
-      ) +
-      guides(fill = guide_legend(title = "Carbon Pools")) +
-      ylab("Source Amount (Pg C)") +
-      ggtitle(paste("Earth Pool: Net Change from", start), 
-              subtitle = scenario) +
-      xlab("Year")
-    return(areaGraph)
-  } else {
-    # Plotting in area graph of fraction
-    areaGraph2 <- ggplot(results) +
-      aes(x = year, y = source_fraction, fill = source_name) +
-      geom_area() +
-      scale_fill_manual(
-        limits = c(
-          "detritus_c_global",
-          "veg_c_global",
-          "soil_c_global",
-          "earth_c",
-          "atmos_c"
-        ),
-        labels = c(
-          "Detritus",
-          "Vegetation",
-          "Soil",
-          "Earth",
-          "Atmosphere"
-        ),
-        values = c(
-          "#DDCC77",
-          "#999933",
-          "#44AA99",
-          "#117733",
-          "#DDDDDD"
-        )
-      ) +
-      guides(fill = guide_legend(title = "Carbon Pools")) +
-      ylab("Source Fraction") +
-      ggtitle(paste("Earth Pool: Net Change from", start), 
-              subtitle = scenario) +
-      xlab("Year")
-    return(areaGraph2)
-  }
 }
 
+earth_plot_maker <- function(results, start, type, subtitleName, facet) {
+  ylabel <- ""
+
+  if (type == "fraction") {
+    results %>%
+      rename(yval = source_fraction) ->
+    results
+    ylabel <- "Source Fraction"
+  } else {
+    results %>%
+      rename(yval = source_amount) ->
+    results
+    ylabel <- "Source Amount (Pg C)"
+  }
+
+  # Plotting in area graph of amount
+  areaGraph <- ggplot(results) +
+    aes(x = year, y = yval, fill = source_name) +
+    geom_area() +
+    scale_fill_manual(
+      limits = c(
+        "detritus_c_global",
+        "veg_c_global",
+        "soil_c_global",
+        "earth_c",
+        "atmos_c"
+      ),
+      labels = c(
+        "Detritus",
+        "Vegetation",
+        "Soil",
+        "Earth",
+        "Atmosphere"
+      ),
+      values = c(
+        "#DDCC77",
+        "#999933",
+        "#44AA99",
+        "#117733",
+        "#DDDDDD"
+      )
+    ) +
+    guides(fill = guide_legend(title = "Carbon Pools")) +
+    ylab(ylabel) +
+    xlab("Year")
+
+  if (facet == FALSE) {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Earth Pool: Net Change from", start),
+        subtitle = subtitleName
+      )
+  } else {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Earth Pool: Net Change from", start)) +
+      facet_wrap(~scenario)
+  }
+
+  return(areaGraph)
+}
+
+earth_plot <- function(ini_file, start, stop, type, scenario) {
+  results <- earth_calc(ini_file, start, stop, scenario)
+  plot <- earth_plot_maker(results, start, type, scenario, FALSE)
+  return(plot)
+}
 
 # Getting plots for all RCPs
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
@@ -121,39 +126,50 @@ ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
 # RCP 2.6 SSP1
 earth_plot(
   ini_file_26_SSP1, 2020, 2100,
-  "fraction",  "RCP 2.6 SSP1"
+  "fraction", "RCP 2.6 SSP1"
 )
 earth_plot(
   ini_file_26_SSP1, 2020, 2100,
-  "amount",  "RCP 2.6 SSP1"
+  "amount", "RCP 2.6 SSP1"
 )
 
 # RCP 1.9 SSP1
 earth_plot(
   ini_file_19_SSP1, 2020, 2100,
-  "fraction",  "RCP 1.9 SSP1"
+  "fraction", "RCP 1.9 SSP1"
 )
 earth_plot(
   ini_file_19_SSP1, 2020, 2100,
-  "amount",  "RCP 1.9 SSP1"
+  "amount", "RCP 1.9 SSP1"
 )
 
 # RCP 2.6 SSP5
 earth_plot(
   ini_file_26_SSP5, 2020, 2100,
-  "fraction",  "RCP 2.6 SSP5"
+  "fraction", "RCP 2.6 SSP5"
 )
 earth_plot(
   ini_file_26_SSP5, 2020, 2100,
-  "amount",  "RCP 2.6 SSP5"
+  "amount", "RCP 2.6 SSP5"
 )
 
 # RCP 1.9 SSP5
 earth_plot(
   ini_file_19_SSP5, 2020, 2100,
-  "fraction",  "RCP 1.9 SSP5"
+  "fraction", "RCP 1.9 SSP5"
 )
 earth_plot(
   ini_file_19_SSP5, 2020, 2100,
-  "amount",  "RCP 1.9 SSP5"
+  "amount", "RCP 1.9 SSP5"
 )
+
+total_results <-
+  rbind(
+    earth_calc(ini_file_26_SSP1, 2020, 2100, "SSP1 \nRCP 2.6"),
+    earth_calc(ini_file_26_SSP5, 2020, 2100, "SSP5 \nRCP 2.6"),
+    earth_calc(ini_file_19_SSP1, 2020, 2100, "SSP1 \nRCP 1.9"),
+    earth_calc(ini_file_19_SSP5, 2020, 2100, "SSP5 \nRCP 1.9 ")
+  )
+
+earth_plot_maker(total_results, 2020, "fraction", "NA", TRUE)
+earth_plot_maker(total_results, 2020, "amount", "NA", TRUE)
