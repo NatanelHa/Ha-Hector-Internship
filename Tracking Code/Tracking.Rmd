@@ -1174,7 +1174,7 @@ dif <- ggplot(total_results) +
     )
   ) +
   guides(fill = guide_legend(title = "Carbon Pools")) +
-  ylab("Change from Previous Year (Pg C)") +
+  ylab("Change from Previous Year (Pg C/Yr)") +
   ggtitle("Difference in Earth Pool") +
   xlab("Year")
 dif
