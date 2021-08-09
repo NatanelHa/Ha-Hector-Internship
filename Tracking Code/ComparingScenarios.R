@@ -39,9 +39,9 @@ get_results <- function(ini_file, start, stop, name) {
     mutate(source_amount = unmod_source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
     mutate(source_fraction = source_fraction - earth_start_fraction * (source_name == "earth_c")) %>%
     mutate(scenario = name) %>%
-    filter(source_name == "earth_c" | source_name == "detritus_c_global" 
-           | source_name == "atmos_c" |source_name == "soil_c_global" 
-           | source_name == "veg_c_global")%>%
+    filter(source_name == "earth_c" | source_name == "detritus_c_global" |
+      source_name == "atmos_c" | source_name == "soil_c_global" |
+      source_name == "veg_c_global") %>%
     group_by(pool_name, source_name) %>%
     mutate(differ = unmod_source_amount - lag(unmod_source_amount)) ->
   results
@@ -56,10 +56,10 @@ ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
 
 total_results <-
   rbind(
-    get_results(ini_file_26_SSP1, 2020, 2100, "RCP 2.6 SSP1"),
-    get_results(ini_file_26_SSP5, 2020, 2100, "RCP 2.6 SSP5"),
-    get_results(ini_file_19_SSP1, 2020, 2100, "RCP 1.9 SSP1"),
-    get_results(ini_file_19_SSP5, 2020, 2100, "RCP 1.9 SSP5")
+    get_results(ini_file_26_SSP1, 2020, 2100, "SSP1 RCP 2.6"),
+    get_results(ini_file_26_SSP5, 2020, 2100, "SSP5 RCP 2.6"),
+    get_results(ini_file_19_SSP1, 2020, 2100, "SSP1 RCP 1.9"),
+    get_results(ini_file_19_SSP5, 2020, 2100, "SSP5 RCP 1.9 ")
   )
 
 amount <- ggplot(total_results) +
@@ -129,87 +129,11 @@ frac <- ggplot(total_results) +
   xlab("Year")
 frac
 
-total_results %>%
-  filter(year == 2100) ->
-total_results_2100
-
-# As Amount
-amountBar <- ggplot(total_results_2100) +
-  aes(x = source_name, y = source_amount, fill = source_name) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~scenario) +
-  scale_fill_manual(
-    limits = c(
-      "detritus_c_global",
-      "veg_c_global",
-      "soil_c_global",
-      "earth_c",
-      "atmos_c"
-    ),
-    labels = c(
-      "Detritus",
-      "Vegetation",
-      "Soil",
-      "Earth",
-      "Atmosphere"
-    ),
-    values = c(
-      "#DDCC77",
-      "#999933",
-      "#44AA99",
-      "#117733",
-      "#DDDDDD"
-    )
-  ) +
-  guides(fill = guide_legend(title = "Carbon Pools")) +
-  ylab("Source Amount (Pg C)") +
-  ggtitle(paste("Earth Pool: Net Change from 2020")) +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
-amountBar
-
-# Plotting in area graph of fraction
-fracBar <- ggplot(total_results_2100) +
-  aes(x = source_name, y = source_fraction, fill = source_name) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~scenario) +
-  scale_fill_manual(
-    limits = c(
-      "detritus_c_global",
-      "veg_c_global",
-      "soil_c_global",
-      "earth_c",
-      "atmos_c"
-    ),
-    labels = c(
-      "Detritus",
-      "Vegetation",
-      "Soil",
-      "Earth",
-      "Atmosphere"
-    ),
-    values = c(
-      "#DDCC77",
-      "#999933",
-      "#44AA99",
-      "#117733",
-      "#DDDDDD"
-    )
-  ) +
-  guides(fill = guide_legend(title = "Carbon Pools")) +
-  ylab("Source Fraction") +
-  ggtitle(paste("Earth Pool: Net Change from 2020")) +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
-fracBar
-
-#Difference
+# Difference
 dif <- ggplot(total_results) +
   aes(x = year, y = differ, fill = source_name) +
   geom_area() +
-  facet_wrap(~scenario)+
+  facet_wrap(~scenario) +
   scale_fill_manual(
     limits = c(
       "detritus_c_global",
@@ -237,5 +161,77 @@ dif <- ggplot(total_results) +
   ylab("Change from Previous Year (Pg C)") +
   ggtitle("Difference in Earth Pool") +
   xlab("Year")
-
 dif
+
+total_results %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+barResults
+
+# As Amount
+amountBar <- ggplot(barResults)+
+  aes(x = scenario, y = source_amount, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD"
+    )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Amount (Pg C)") +
+  ggtitle(paste("Earth Pool: Net Change from 2020")) +
+  xlab("Scenario")
+amountBar
+
+# Plotting in area graph of fraction
+fracBar <- ggplot(barResults) +
+  aes(x = scenario, y = source_fraction, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD"
+    )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Fraction)") +
+  ggtitle(paste("Earth Pool: Net Change from 2020")) +
+  xlab("Scenario")
+fracBar

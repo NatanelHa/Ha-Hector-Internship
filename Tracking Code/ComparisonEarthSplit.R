@@ -55,8 +55,8 @@ ffi_results <- function(ini_file, start, stop, scenario) {
     pivot_wider(names_from = "source_name", values_from = "source_amount") %>%
     mutate(earth_c = earth_c + fossil_fuels) %>%
     mutate(fossil_fuels = fossil_fuels * -1) %>%
-    pivot_longer(4:13, names_to = "source_name", values_to = "source_amount")%>%
-    mutate(title = scenario)->
+    pivot_longer(4:13, names_to = "source_name", values_to = "source_amount") %>%
+    mutate(title = scenario) ->
   results
 }
 
@@ -76,7 +76,7 @@ combined <- rbind(
 areaGraph <- ggplot(combined) +
   aes(x = year, y = source_amount, fill = source_name) +
   geom_area() +
-  facet_wrap(~title)+
+  facet_wrap(~title) +
   scale_fill_manual(
     limits = c(
       "detritus_c_global",
@@ -110,15 +110,15 @@ areaGraph <- ggplot(combined) +
 areaGraph
 
 combined %>%
-  filter(year > 2030)%>%
-  filter(year %% 25 == 0)->
-  barData
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+barData
 
 
 barGraph <- ggplot(barData) +
   aes(x = title, y = source_amount, fill = source_name) +
-  geom_bar(stat="identity") +
-  facet_wrap(~year)+
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
   scale_fill_manual(
     limits = c(
       "detritus_c_global",
@@ -148,8 +148,5 @@ barGraph <- ggplot(barData) +
   guides(fill = guide_legend(title = "Carbon Pools")) +
   ylab("Source Amount (Pg C)") +
   ggtitle(paste("Earth Pool: Net Change from 2020")) +
-  xlab("Year")
+  xlab("Scenario")
 barGraph
-
-
-
