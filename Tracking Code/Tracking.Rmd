@@ -587,7 +587,7 @@ split_earth <- function(ini_file, start, stop, scenario) {
 ```
 
 I also created a new combined dataset for faceting. 
-```{r combiningFfi}
+```{r combiningFfi, message=FALSE, warning=FALSE}
 total_results_split <-
   rbind(
     ffi_results(ini_file_26_SSP1, 2020, 2100, "SSP1 \nRCP 2.6"),
@@ -951,10 +951,10 @@ difference_plot_maker <- function(td, pool, title, facet) {
     td %>%
       filter(pool_name == pool) ->
     td
-    lineSize <- 1.75
+    lineSize <- 1.25
   }
   else {
-    lineSize <- 1
+    lineSize <- 0.75
   }
   
   lineGraph <- ggplot(td) +
@@ -1062,6 +1062,426 @@ difference_plot(ini_file_19_SSP5, 2020, 2100, "atmos_c", "RCP 1.9 SSP5")
 #### Faceted
 ```{r atmosDifFacet}
 difference_plot_maker(total_results, "atmos_c", "NA", TRUE)
+```
+
+## Atmopsheric Pool Examination
+I then took a deeper look at the atmosphere pool. I took a similar approach as the earth
+pool and made a function that would look at net change from 2020. 
+
+```{r atmosFunc}
+atmos_results <- function(ini_file, start, stop, scenario) {
+  results <- tracking_results(ini_file, start, stop, scenario)
+
+  results %>%
+    filter(pool_name == "atmos_c") %>%
+    select(-pool_value, -source_fraction) %>%
+    pivot_wider(names_from = "source_name", values_from = "source_amount") %>%
+    mutate(detritus_c_global = detritus_c_global - first(detritus_c_global))%>%
+    mutate(veg_c_global = veg_c_global - first(veg_c_global))%>%
+    mutate(soil_c_global = soil_c_global - first(soil_c_global))%>%
+    mutate(earth_c = earth_c - first(earth_c))%>%
+    mutate(atmos_c = atmos_c - first(atmos_c))%>%
+    pivot_longer(5:13, names_to = "source_name", values_to = "source_amount") ->
+    results
+  return(results)
+}
+```
+
+I also created a function that would also split the atmosphere with the earth pool
+```{r splitAtmosFunc}
+atmos_results_split <- function(ini_file, start, stop, scenario) {
+  results <- tracking_results(ini_file, start, stop, scenario)
+  
+  core <- newcore(ini_file)
+  run(core)
+  
+  ffi_emissions <- fetchvars(core, 2020:2100, FFI_EMISSIONS())
+  ffi_emissions$value <- cumsum(ffi_emissions$value)
+  
+  ffi_emissions %>%
+    select(value, year) %>%
+    rename("fossil_fuels" = value) ->
+    ffi_emissions
+  
+  results %>%
+    filter(pool_name == "atmos_c") %>%
+    right_join(ffi_emissions) %>%
+    select(-pool_value, -source_fraction) %>%
+    pivot_wider(names_from = "source_name", values_from = "source_amount") %>%
+    mutate(earth_c = earth_c - fossil_fuels) %>%
+    mutate(detritus_c_global = detritus_c_global - first(detritus_c_global))%>%
+    mutate(veg_c_global = veg_c_global - first(veg_c_global))%>%
+    mutate(soil_c_global = soil_c_global - first(soil_c_global))%>%
+    mutate(earth_c = earth_c - first(earth_c))%>%
+    mutate(atmos_c = atmos_c - first(atmos_c))%>%
+    pivot_longer(5:14, names_to = "source_name", values_to = "source_amount") ->
+    results
+  return(results)
+}
+```
+
+I then also created a plotting function
+```{r atmosPlotFunc}
+atmos_plot_maker <- function(results, start, type, subtitleName, facet) {
+  ylabel <- ""
+
+  if (type == "fraction") {
+    results %>%
+      rename(yval = source_fraction) ->
+    results
+    ylabel <- "Source Fraction"
+  } else {
+    results %>%
+      rename(yval = source_amount) ->
+    results
+    ylabel <- "Source Amount (Pg C)"
+  }
+
+  # Plotting in area graph of amount
+  areaGraph <- ggplot(results) +
+    aes(x = year, y = yval, fill = source_name) +
+    geom_area() +
+    scale_fill_manual(
+      limits = c(
+        "detritus_c_global",
+        "veg_c_global",
+        "soil_c_global",
+        "earth_c",
+        "atmos_c"
+      ),
+      labels = c(
+        "Detritus",
+        "Vegetation",
+        "Soil",
+        "Earth",
+        "Atmosphere"
+      ),
+      values = c(
+        "#DDCC77",
+        "#999933",
+        "#44AA99",
+        "#117733",
+        "#DDDDDD"
+      )
+    ) +
+    guides(fill = guide_legend(title = "Carbon Pools")) +
+    ylab(ylabel) +
+    xlab("Year")
+
+  if (facet == FALSE) {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Atmospheric Pool: Net Change from", start),
+        subtitle = subtitleName
+      )
+  } else {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Atmospheric Pool: Net Change from", start)) +
+      facet_wrap(~scenario)
+  }
+  return(areaGraph)
+}
+```
+
+I then created combined functions for both the unsplit and split atmospheric 
+pools
+```{r combinedAtmosFunc}
+#Unsplit
+atmos_plot <- function(ini_file, start, stop, type, scenario) {
+  results <- atmos_results(ini_file, start, stop, scenario)
+  plot <- atmos_plot_maker(results, start, type, scenario, FALSE)
+  return(plot)
+}
+
+#Split
+atmos_plot_split <- function(ini_file, start, stop, scenario) {
+  results <- atmos_results_split(ini_file, start, stop, scenario)
+  plot <- atmos_plot_maker(results, start, "amount", scenario, FALSE)
+  return(plot)
+}
+```
+
+I then created larger combined datasets for faceting
+```{r facetDataAtmos, message=FALSE, warning=FALSE}
+#Unsplit
+atmos_combined <- rbind(
+  atmos_results(ini_file_26_SSP1, 2020, 2100, "SSP1 \nRCP 2.6"),
+  atmos_results(ini_file_19_SSP1, 2020, 2100, "SSP1 \nRCP 1.9"),
+  atmos_results(ini_file_26_SSP5, 2020, 2100, "SSP5 \nRCP 2.6"),
+  atmos_results(ini_file_19_SSP5, 2020, 2100, "SSP5 \nRCP 1.9")
+)
+
+#Split
+atmos_combined_split <- rbind(
+  atmos_results_split(ini_file_26_SSP1, 2020, 2100, "SSP1 \nRCP 2.6"),
+  atmos_results_split(ini_file_19_SSP1, 2020, 2100, "SSP1 \nRCP 1.9"),
+  atmos_results_split(ini_file_26_SSP5, 2020, 2100, "SSP5 \nRCP 2.6"),
+  atmos_results_split(ini_file_19_SSP5, 2020, 2100, "SSP5 \nRCP 1.9")
+)
+```
+
+### Atmospheric Plots {.tabset}
+
+#### RCP 2.6 SSP1
+```{r atm_am26s1, echo=FALSE}
+atmos_plot(
+  ini_file_26_SSP1, 2020, 2100,
+  "amount", "RCP 2.6 SSP1"
+)
+```
+
+
+#### RCP 2.6 SSP5
+```{r atm_am26s5, echo=FALSE}
+atmos_plot(
+  ini_file_26_SSP5, 2020, 2100,
+  "amount", "RCP 2.6 SSP5"
+)
+```
+
+#### RCP 1.9 SSP1
+```{r atm_am19s1, echo=FALSE}
+atmos_plot(
+  ini_file_19_SSP1, 2020, 2100,
+  "amount", "RCP 1.9 SSP1"
+)
+```
+
+#### RCP 1.9 SSP5
+```{r atm_am19s5, echo=FALSE}
+atmos_plot(
+  ini_file_19_SSP5, 2020, 2100,
+  "amount", "RCP 1.9 SSP5"
+)
+```
+
+#### Faceted 
+```{r atm_amfaceted, echo=FALSE}
+atmos_plot_maker(
+  atmos_combined, 2020, "amount", "NA", TRUE
+)
+```
+
+### Stacked Bar Graphs {.tabset}
+
+First we needed to filter for years
+```{r filteratmYears}
+atmos_combined %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+barData
+```
+
+#### Graphs {.tabset}
+##### Amount of Carbon
+```{r atm_stackedAmount, fig.width=9}
+amountBar <- ggplot(barData)+
+  aes(x = scenario, y = source_amount, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD"
+    )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Amount (Pg C)") +
+  ggtitle(paste("Atmosphere Pool: Net Change from 2020")) +
+  xlab("Scenario")
+amountBar
+```
+
+##### Fraction of Pool
+```{r atm_stackedFraction, fig.width=9}
+fracBar <- ggplot(barResults) +
+  aes(x = scenario, y = source_fraction, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD"
+    )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Fraction)") +
+  ggtitle(paste("Atmosphere Pool: Net Change from 2020")) +
+  xlab("Scenario")
+fracBar
+```
+
+```{r atmosPlotFuncHidden, include=FALSE}
+atmos_plot_maker <- function(results, start, type, subtitleName, facet) {
+  ylabel <- ""
+
+  if (type == "fraction") {
+    results %>%
+      rename(yval = source_fraction) ->
+    results
+    ylabel <- "Source Fraction"
+  } else {
+    results %>%
+      rename(yval = source_amount) ->
+    results
+    ylabel <- "Source Amount (Pg C)"
+  }
+
+  # Plotting in area graph of amount
+  areaGraph <- ggplot(results) +
+    aes(x = year, y = yval, fill = source_name) +
+    geom_area() +
+    scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "fossil_fuels",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth In",
+      "Earth Out",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#882255",
+      "#DDDDDD"
+    )
+  ) +
+    guides(fill = guide_legend(title = "Carbon Pools")) +
+    ylab(ylabel) +
+    xlab("Year")
+
+  if (facet == FALSE) {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Atmospheric Pool: Net Change from", start),
+        subtitle = subtitleName
+      )
+  } else {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Atmospheric Pool: Net Change from", start)) +
+      facet_wrap(~scenario)
+  }
+  return(areaGraph)
+}
+```
+
+### Atmospheric Pool with Split Earth {.tabset}
+#### RCP 2.6 SSP1
+```{r atm_split26s1, echo=FALSE, message=FALSE, warning=FALSE}
+atmos_plot_split(ini_file_26_SSP1, 2020, 2100, "RCP 2.6 SSP1")
+```
+
+#### RCP 2.6 SSP6
+```{r atm_split26s5, echo=FALSE, message=FALSE, warning=FALSE}
+atmos_plot_split(ini_file_26_SSP5, 2020, 2100, "RCP 2.6 SSP5")
+```
+
+#### RCP 1.9 SSP1
+```{r atm_split19s1, echo=FALSE, message=FALSE, warning=FALSE}
+atmos_plot_split(ini_file_19_SSP1, 2020, 2100, "RCP 1.9 SSP1")
+```
+
+#### RCP 1.9 SSP5
+```{r atm_split19s5, echo=FALSE, message=FALSE, warning=FALSE}
+atmos_plot_split(ini_file_19_SSP5, 2020, 2100, "RCP 1.9 SSP5")
+```
+
+#### Facetted
+```{r atm_split_facetted, echo=FALSE, message=FALSE, warning=FALSE}
+atmos_plot_maker(atmos_combined_split, 2020, "amount", "NA", TRUE)
+```
+
+### Stacked Bar Graph with Split Earth
+I also made stacked bar charts from the combine dataset 
+
+First we needed to filter for years
+```{r filteratmYearsSplit}
+atmos_combined_split %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+barData
+```
+
+Then it could be plotted. 
+```{r atmStackedBar, fig.width=9}
+barGraph <- ggplot(barData) +
+  aes(x = scenario, y = source_amount, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "fossil_fuels",
+      "atmos_c"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Fossil Fuels",
+      "Atmosphere"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#882255",
+      "#DDDDDD"
+    )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Amount (Pg C)") +
+  ggtitle(paste("Atmosphere Pool: Net Change from 2020")) +
+  xlab("Scenario")
+barGraph
 ```
 
 ##### Session Info: 
