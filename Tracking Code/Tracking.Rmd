@@ -780,7 +780,7 @@ earth_plot_maker(total_results_split, 2020, "amount", "NA", TRUE)
 ```
 
 ### Stacked Bar Chart
-I also made stacked bar charts from the combine dataset 
+I also made stacked bar charts from the combined dataset 
 
 First we needed to filter for years
 ```{r filterEarthYears}
@@ -792,6 +792,191 @@ barData
 
 Then it could be plotted. 
 ```{r earthStackedBar, fig.width=9}
+barGraph <- ggplot(barData) +
+  aes(x = scenario, y = source_amount, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+        limits = c(
+          "detritus_c_global",
+          "veg_c_global",
+          "soil_c_global",
+          "earth_c",
+          "fossil_fuels",
+          "atmos_c",
+          "HL",
+          "intermediate",
+          "LL",
+          "deep"
+        ),
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth In",
+          "Earth Out",
+          "Atmosphere",
+          "High Level Ocean",
+          "Intermediate Ocean",
+          "Low Level Ocean",
+          "Deep Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#0d2612",
+          "#DDDDDD",
+          "#882255",
+          "#AA4499",
+          "#88CCEE",
+          "#332288"
+        )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Amount (Pg C)") +
+  ggtitle(paste("Earth Pool: Net Change from 2020")) +
+  xlab("Scenario")
+barGraph
+```
+
+### Looking Specifically at Uptake Only 
+First I changed the plot maker to not include fossil fuels in the labeller
+
+```{r changedWithoutFFiplot}
+earth_plot_maker <- function(results, start, type, subtitleName, facet) {
+  ylabel <- ""
+  
+  if (type == "fraction") {
+    results %>%
+      rename(yval = source_fraction) ->
+      results
+    ylabel <- "Source Fraction"
+  } else {
+    results %>%
+      rename(yval = source_amount) ->
+      results
+    ylabel <- "Source Amount (Pg C)"
+  }
+  
+  # Plotting in area graph of amount
+  areaGraph <- ggplot(results) +
+    aes(x = year, y = yval, fill = source_name) +
+    geom_area() +
+    scale_fill_manual(
+        limits = c(
+          "detritus_c_global",
+          "veg_c_global",
+          "soil_c_global",
+          "earth_c",
+          "atmos_c",
+          "HL",
+          "intermediate",
+          "LL",
+          "deep"
+        ),
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth",
+          "Atmosphere",
+          "High Level Ocean",
+          "Intermediate Ocean",
+          "Low Level Ocean",
+          "Deep Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#DDDDDD",
+          "#882255",
+          "#AA4499",
+          "#88CCEE",
+          "#332288"
+        )
+    ) +
+    guides(fill = guide_legend(title = "Carbon Pools")) +
+    ylab(ylabel) +
+    xlab("Year")
+  
+  if (facet == FALSE) {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Earth Pool: Net Change from", start),
+              subtitle = subtitleName
+      )
+  } else {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Earth Pool: Net Change from", start)) +
+      facet_wrap(~scenario)
+  }
+  
+  return(areaGraph)
+}
+```
+
+Then I created a new function that would filter out the fossil fuel emissions, so
+it would only show uptake
+```{r uptakeOnlyFunc}
+split_earth_uptake <- function(ini_file, start, stop, scenario) {
+  results <- ffi_results(ini_file, start, stop, scenario)
+  results %>% 
+    filter(source_name != "fossil_fuels")->
+    results
+  plot <- earth_plot_maker(results, start, "amount", scenario, FALSE)
+  return(plot)
+}
+```
+
+I also changed the combined dataset in order for it to also be only uptake
+```{r filterSplitResults}
+total_results_split %>%
+  filter(source_name != "fossil_fuels")->
+  total_results_split
+```
+
+### Split Earth Plots {.tabset}
+#### RCP 2.6 SSP1
+```{r earth_splitNoFFi26s1, echo=FALSE, message=FALSE, warning=FALSE}
+split_earth_uptake(ini_file_26_SSP1, 2020, 2100, "RCP 2.6 SSP1")
+```
+
+#### RCP 2.6 SSP5
+```{r earth_splitNoFFi26s5, echo=FALSE, message=FALSE, warning=FALSE}
+split_earth_uptake(ini_file_26_SSP5, 2020, 2100, "RCP 2.6 SSP5")
+```
+
+#### RCP 1.9 SSP1
+```{r earth_splitNoFFi19s1, echo=FALSE, message=FALSE, warning=FALSE}
+split_earth_uptake(ini_file_19_SSP1, 2020, 2100, "RCP 1.9 SSP1")
+```
+
+#### RCP 1.9 SSP5
+```{r earth_splitNoFFi19s5, echo=FALSE, message=FALSE, warning=FALSE}
+split_earth_uptake(ini_file_19_SSP5, 2020, 2100, "RCP 1.9 SSP5")
+```
+
+#### Facetted
+```{r earth_splitNoFFi_facetted, echo=FALSE, message=FALSE, warning=FALSE}
+earth_plot_maker(total_results_split, 2020, "amount", "NA", TRUE)
+```
+
+### Stacked Bar Chart
+I also made stacked bar charts from the combined dataset 
+
+First we needed to filter for years
+```{r filterEarthYears2}
+total_results_split %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+barData
+```
+
+Then it could be plotted. 
+```{r earthStackedBar2, fig.width=9}
 barGraph <- ggplot(barData) +
   aes(x = scenario, y = source_amount, fill = source_name) +
   geom_bar(stat = "identity") +
