@@ -35,9 +35,16 @@ earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
   td %>%
     filter(source_name == "earth_c") %>%
     filter(pool_name == "earth_c" |
+      pool_name == "soil_c_global" |
       pool_name == "deep" |
-      pool_name == "soil_c_global") %>%
-    select(-source_fraction, -pool_value) ->
+      pool_name == "HL" |
+      pool_name == "intermediate" |
+      pool_name == "LL") %>%
+    select(-source_fraction, -pool_value) %>%
+    pivot_wider(names_from = "pool_name", values_from = "source_amount") %>%
+    mutate(ocean = deep + HL + intermediate + LL) %>%
+    select(-deep, -HL, -intermediate, -LL) %>%
+    pivot_longer(5:7, names_to = "pool_name", values_to = "source_amount") ->
   td
 
   title <- ""
@@ -46,7 +53,7 @@ earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
   if (type == "total") {
     title <- "Total Carbon with Earth Pool Origin"
     ytitle <- "Source Amount (Pg C)"
-    
+
     td <- td %>%
       rename(yval = source_amount)
   } else {
@@ -68,25 +75,24 @@ earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
       right_join(ffi_emissions) %>%
       pivot_wider(names_from = "pool_name", values_from = "source_amount") %>%
       mutate(earth_c = earth_c - first(earth_c) + fossil_fuels) %>%
-      mutate(deep = deep - first(deep)) %>%
+      mutate(ocean = ocean - first(ocean)) %>%
       mutate(soil_c_global = soil_c_global - first(soil_c_global)) %>%
       select(-fossil_fuels) %>%
       pivot_longer(5:7, names_to = "pool_name", values_to = "source_amount") ->
     td
-    
+
     if (type == "rate") {
       td %>%
         group_by(pool_name, source_name) %>%
         mutate(differ = source_amount - lag(source_amount)) %>%
         filter(!is.na(differ)) ->
       td
-      
+
       title <- "Rate of Uptake of Carbon with Earth Pool Origin"
       ytitle <- "Source Amount (Pg C/Yr)"
       td <- td %>%
         rename(yval = differ)
-    }
-    else {
+    } else {
       td <- td %>%
         rename(yval = source_amount)
     }
@@ -100,12 +106,12 @@ earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
       limits = c(
         "earth_c",
         "soil_c_global",
-        "deep"
+        "ocean"
       ),
       labels = c(
         "Earth",
         "Soil",
-        "Deep Ocean"
+        "Ocean"
       ),
       values = c(
         "#117733",
@@ -115,11 +121,14 @@ earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
     ) +
     guides(color = guide_legend(title = "Carbon Pools")) +
     ylab(ytitle) +
-    ggtitle(title, 
-            subtitle = scenarioName) +
+    ggtitle(title,
+      subtitle = scenarioName
+    ) +
     xlab("Year")
   return(graph)
 }
+
+
 
 path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
 ini_file_26_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
