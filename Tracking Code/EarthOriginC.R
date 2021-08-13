@@ -4,6 +4,63 @@ library(ggplot2)
 library(dplyr)
 library(tidyr)
 
+earth_calc <- function(ini_file, start, stop, scenario) {
+  results <- tracking_results(ini_file, start, stop, scenario) %>%
+    filter(pool_name == "earth_c")
+  
+  # Finding earth_c values in start
+  # The year negative emissions starts
+  earth_start <-
+    results %>%
+    filter(source_name == "earth_c")
+  
+  earth_start_carbon <-
+    first(earth_start$source_amount)
+  
+  earth_start_fraction <-
+    first(earth_start$source_fraction)
+  
+  # Calculating difference from start
+  results %>%
+    mutate(source_amount = source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
+    mutate(source_fraction = source_fraction - earth_start_fraction * 
+             (source_name =="earth_c")) ->
+    results
+  return(results)
+}
+
+
+ffi_results <- function(ini_file, start, stop, scenario) {
+  results <- earth_calc(ini_file, start, stop, scenario)
+  
+  core <- newcore(ini_file)
+  run(core)
+  
+  daccs <- fetchvars(core, 2020:2100, DACCS_UPTAKE())
+  daccs$value <- cumsum(daccs$value)
+  
+  daccs %>%
+    select(value, year) %>%
+    rename("daccs_uptake" = value) ->
+    daccs
+  
+  results %>%
+    group_by(year, scenario) %>%
+    mutate(sum = sum(source_amount)) ->
+    results
+  
+  results %>%
+    right_join(daccs)%>%
+    select(-pool_value, -source_fraction) %>%
+    pivot_wider(names_from = "source_name", values_from = "source_amount")%>%
+    mutate(fossil_fuels = earth_c)%>%
+    mutate(earth_c = daccs_uptake - sum + earth_c)%>%
+    mutate(fossil_fuels = fossil_fuels - earth_c)%>%
+    select(-sum, -daccs_uptake)%>%
+    pivot_longer(5:14, names_to = "source_name", values_to = "source_amount")->
+    results
+}
+
 # Get tracking results
 tracking_results <- function(ini_file, start, stop, scenarioName) {
   # establish core
@@ -34,8 +91,7 @@ earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
 
   td %>%
     filter(source_name == "earth_c") %>%
-    filter(pool_name == "earth_c" |
-      pool_name == "deep" |
+    filter(pool_name == "deep" |
       pool_name == "soil_c_global") %>%
     select(-source_fraction, -pool_value) ->
   td
@@ -56,23 +112,20 @@ earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
     core <- newcore(ini_file)
     run(core)
 
-    ffi_emissions <- fetchvars(core, 2020:2100, FFI_EMISSIONS())
-    ffi_emissions$value <- cumsum(ffi_emissions$value)
-
-    ffi_emissions %>%
-      select(value, year) %>%
-      rename("fossil_fuels" = value) ->
-    ffi_emissions
-
+    earthData <- ffi_results(ini_file, 2020, 2100, scenarioName)
+    earthData %>%
+      filter(source_name=="earth_c")%>%
+      select(source_amount, year)%>%
+      rename(earth_c = "source_amount")->
+    earthData
+    
     td %>%
-      right_join(ffi_emissions) %>%
       pivot_wider(names_from = "pool_name", values_from = "source_amount") %>%
-      mutate(earth_c = earth_c - first(earth_c) + fossil_fuels) %>%
+      right_join(earthData)%>%
       mutate(deep = deep - first(deep)) %>%
       mutate(soil_c_global = soil_c_global - first(soil_c_global)) %>%
-      select(-fossil_fuels) %>%
       pivot_longer(5:7, names_to = "pool_name", values_to = "source_amount") ->
-    td
+      td
     
     if (type == "rate") {
       td %>%
