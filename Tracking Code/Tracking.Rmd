@@ -841,7 +841,7 @@ barGraph <- ggplot(barData) +
 barGraph
 ```
 
-### Looking Specifically at Uptake Only 
+## Looking Specifically at Uptake Only 
 First I changed the plot maker to not include fossil fuels in the labeller
 
 ```{r changedWithoutFFiplot}
@@ -938,7 +938,7 @@ total_results_split %>%
   total_results_split
 ```
 
-### Split Earth Plots {.tabset}
+### Uptake Earth Plots {.tabset}
 #### RCP 2.6 SSP1
 ```{r earth_splitNoFFi26s1, echo=FALSE, message=FALSE, warning=FALSE}
 split_earth_uptake(ini_file_26_SSP1, 2020, 2100, "RCP 2.6 SSP1")
@@ -1024,6 +1024,222 @@ barGraph <- ggplot(barData) +
   ggtitle(paste("Earth Pool: Net Change from 2020")) +
   xlab("Scenario")
 barGraph
+```
+
+### Fraction Plots
+Then I wanted to look at the fraction of uptake in each plot 
+
+First I wanted to create a set without any earth carbon
+```{r Fraction Plots}
+total_results_split %>%
+  filter(source_name != "earth_c") ->
+  no_earth
+```
+
+Then I wanted to find the fraction of each of the origin pools of the total
+uptake
+```{r finding fraction}
+total_results_split %>%
+  group_by(year, scenario)%>%
+  mutate(sum = sum(source_amount))->
+  uptake_fraction 
+
+uptake_fraction %>%
+  mutate(source_fraction = source_amount/sum)->
+  uptake_fraction
+
+no_earth %>%
+  group_by(year, scenario)%>%
+  mutate(sum = sum(source_amount))->
+  uptake_fraction_no_earth
+
+uptake_fraction_no_earth %>%
+  mutate(source_fraction = source_amount/sum)->
+  uptake_fraction_no_earth
+```
+
+#### Fraction Plots {.tabset}
+##### RCP 2.6 SSP1
+```{r earth_frac_26s1, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction %>%
+  filter(scenario == "SSP1 \nRCP 2.6")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP1 \nRCP 2.6", FALSE)
+```
+
+##### RCP 2.6 SSP5
+```{r earth_frac_26s5, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction %>%
+  filter(scenario == "SSP5 \nRCP 2.6")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP5 \nRCP 2.6", FALSE)
+```
+
+##### RCP 1.9 SSP1
+```{r earth_frac_19s1, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction %>%
+  filter(scenario == "SSP1 \nRCP 1.9")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP1 \nRCP 1.9", FALSE)
+```
+
+##### RCP 1.9 SSP5
+```{r earth_frac_19s5, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction %>%
+  filter(scenario == "SSP1 \nRCP 1.9")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP1 \nRCP 1.9", FALSE)
+```
+
+##### Faceted
+```{r earthFrac_faceted}
+earth_plot_maker(uptake_fraction, 2020, "fraction", "Fraction of Uptake", TRUE)
+```
+
+#### Fraction Plots (Without Earth Pool) {.tabset}
+##### RCP 2.6 SSP1
+```{r frac_no_earth_26s1, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction_no_earth %>%
+  filter(scenario == "SSP1 \nRCP 2.6")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP1 \nRCP 2.6", FALSE)
+```
+
+##### RCP 2.6 SSP5
+```{r frac_no_earth_26s5, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction_no_earth %>%
+  filter(scenario == "SSP5 \nRCP 2.6")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP5 \nRCP 2.6", FALSE)
+```
+
+##### RCP 1.9 SSP1
+```{r frac_no_earth_19s1, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction_no_earth %>%
+  filter(scenario == "SSP1 \nRCP 1.9")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP1 \nRCP 1.9", FALSE)
+```
+
+##### RCP 1.9 SSP5
+```{r frac_no_earth_19s5, echo=FALSE, message=FALSE, warning=FALSE}
+uptake_fraction_no_earth %>%
+  filter(scenario == "SSP1 \nRCP 1.9")->
+  filtered_frac
+earth_plot_maker(filtered_frac, 2020, "fraction", "SSP1 \nRCP 1.9", FALSE)
+```
+
+##### Faceted
+```{r fracNoEarth_faceted}
+earth_plot_maker(uptake_fraction_no_earth, 2020, "fraction", "Fraction of Uptake", TRUE)
+```
+
+
+#### Bar Charts {.tabset}
+##### With Earth
+```{r earthUptakeBarFrac, fig.width=9}
+uptake_fraction %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+  barResults
+
+amountBar <- ggplot(barResults)+
+  aes(x = scenario, y = source_fraction, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c",
+      "HL",
+      "intermediate",
+      "LL",
+      "deep"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere",
+      "High Level Ocean",
+      "Intermediate Ocean",
+      "Low Level Ocean",
+      "Deep Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#882255",
+      "#AA4499",
+      "#88CCEE",
+      "#332288"
+    )
+  )+
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Fraction") +
+  ggtitle(paste("Earth Pool: Net Change from 2020")) +
+  xlab("Scenario")
+amountBar
+```
+
+##### Without Earth
+```{r noEarthUptakeBarFrac, fig.width=9}
+uptake_fraction_no_earth %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+  barResults
+
+amountBar <- ggplot(barResults)+
+  aes(x = scenario, y = source_fraction, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c",
+      "HL",
+      "intermediate",
+      "LL",
+      "deep"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere",
+      "High Level Ocean",
+      "Intermediate Ocean",
+      "Low Level Ocean",
+      "Deep Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#882255",
+      "#AA4499",
+      "#88CCEE",
+      "#332288"
+    )
+  )+
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Fraction") +
+  ggtitle(paste("Earth Pool: Net Change from 2020")) +
+  xlab("Scenario")
+amountBar
 ```
 
 ## Function for increase in each pool
