@@ -1130,7 +1130,7 @@ earth_plot_maker(filtered_frac, 2020, "fraction", "SSP1 \nRCP 1.9", FALSE)
 ```
 
 ##### Faceted
-```{r fracNoEarth_faceted}
+```{r fracNoEarth_faceted, warning=FALSE}
 earth_plot_maker(uptake_fraction_no_earth, 2020, "fraction", "Fraction of Uptake", TRUE)
 ```
 
@@ -2235,6 +2235,161 @@ earth_origin_plot(ini_file_19_SSP1, 2020, 2100, "rate", "RCP 1.9 SSP1")
 earth_origin_plot(ini_file_19_SSP5, 2020, 2100, "rate", "RCP 1.9 SSP5")
 ```
 
+### Combining into one graph
+I then created a new function to combine all the different pathways into one graph
+
+```{r combinedEarthPoolOrigin}
+earth_origin_plot_total <- function(td, type) {
+  td %>%
+    filter(source_name == "earth_c") %>%
+    filter(pool_name == "earth_c" |
+             pool_name == "soil_c_global" |
+             pool_name == "deep" |
+             pool_name == "HL" |
+             pool_name == "intermediate" |
+             pool_name == "LL") %>%
+    select(-source_fraction, -pool_value) %>%
+    pivot_wider(names_from = "pool_name", values_from = "source_amount") %>%
+    mutate(ocean = deep + HL + intermediate + LL) %>%
+    select(-deep, -HL, -intermediate, -LL) %>%
+    pivot_longer(5:7, names_to = "pool_name", values_to = "source_amount") ->
+    td
+  
+  title <- ""
+  ytitle <- ""
+  
+  if (type == "total") {
+    title <- "Total Carbon with Earth Pool Origin"
+    ytitle <- "Source Amount (Pg C)"
+    
+    td <- td %>%
+      rename(yval = source_amount)
+  } else {
+    title <- "Total Uptake Carbon with Earth Pool Origin"
+    ytitle <- "Source Amount (Pg C)"
+    
+    core26_1 <- newcore(ini_file_26_SSP1)
+    core26_5 <- newcore(ini_file_26_SSP5)
+    core19_1 <- newcore(ini_file_19_SSP1)
+    core19_5 <- newcore(ini_file_19_SSP5)
+    run(core26_1)
+    run(core26_5)
+    run(core19_1)
+    run(core19_5)
+    
+    ffi_emissions26_1 <- fetchvars(core26_1, 2020:2100, FFI_EMISSIONS(), 
+                                   scenario = "SSP1 \nRCP 2.6")
+    ffi_emissions26_1$value <- cumsum(ffi_emissions26_1$value)
+    
+    ffi_emissions26_5 <- fetchvars(core26_5, 2020:2100, FFI_EMISSIONS(), 
+                                   scenario = "SSP5 \nRCP 2.6")
+    ffi_emissions26_5$value <- cumsum(ffi_emissions26_5$value)
+    
+    ffi_emissions19_1 <- fetchvars(core19_1, 2020:2100, FFI_EMISSIONS(), 
+                                   scenario = "SSP1 \nRCP 1.9")
+    ffi_emissions19_1$value <- cumsum(ffi_emissions19_1$value)
+    
+    ffi_emissions19_5 <- fetchvars(core19_5, 2020:2100, FFI_EMISSIONS(), 
+                                   scenario = "SSP5 \nRCP 1.9")
+    ffi_emissions19_5$value <- cumsum(ffi_emissions19_5$value)
+    
+    ffi_emissions <- rbind (
+      ffi_emissions26_1,
+      ffi_emissions26_5,
+      ffi_emissions19_1,
+      ffi_emissions19_5
+    )
+    
+    ffi_emissions %>%
+      select(value, year, scenario) %>%
+      rename("fossil_fuels" = value) ->
+      ffi_emissions
+    
+    ffi_emissionsG1 <<- ffi_emissions
+    
+    td %>%
+      right_join(ffi_emissions) ->
+      td
+    ffi_emissionsG2 <<- td
+    
+    td %>%
+      pivot_wider(names_from = "pool_name", values_from = "source_amount") %>%
+      group_by(scenario)%>%
+      mutate(earth_c = earth_c - first(earth_c) + fossil_fuels) %>%
+      mutate(ocean = ocean - first(ocean)) %>%
+      mutate(soil_c_global = soil_c_global - first(soil_c_global)) %>%
+      select(-fossil_fuels) %>%
+      pivot_longer(5:7, names_to = "pool_name", values_to = "source_amount") ->
+      td
+    
+    if (type == "rate") {
+      td %>%
+        group_by(pool_name, source_name, scenario) %>%
+        mutate(differ = source_amount - lag(source_amount)) %>%
+        filter(!is.na(differ)) ->
+        td
+      
+      title <- "Rate of Uptake of Carbon with Earth Pool Origin"
+      ytitle <- "Source Amount (Pg C/Yr)"
+      td <- td %>%
+        rename(yval = differ)
+    } else {
+      td <- td %>%
+        rename(yval = source_amount)
+    }
+  }
+  
+  
+  graph <- ggplot(td) +
+    aes(x = year, y = yval, color = pool_name, linetype = scenario) +
+    geom_line(size = 0.8) +
+    scale_color_manual(
+      limits = c(
+        "earth_c",
+        "soil_c_global",
+        "ocean"
+      ),
+      labels = c(
+        "Earth",
+        "Soil",
+        "Ocean"
+      ),
+      values = c(
+        "#117733",
+        "#44AA99",
+        "#332288"
+      )
+    ) +
+    scale_linetype_manual(values=c("solid", "longdash", "dotted","dotdash"))+
+    guides(color = guide_legend(title = "Carbon Pools")) +
+    ylab(ytitle) +
+    ggtitle(title) +
+    xlab("Year")
+  return(graph)
+}
+```
+
+I then created a combined data set of the tracking results
+```{r combinedSimpleTracking}
+tracking_data <- rbind(
+  tracking_results(ini_file_26_SSP1, 2020, 2100, "SSP1 \nRCP 2.6"),
+  tracking_results(ini_file_26_SSP5, 2020, 2100, "SSP5 \nRCP 2.6"),
+  tracking_results(ini_file_19_SSP1, 2020, 2100, "SSP1 \nRCP 1.9"),
+  tracking_results(ini_file_19_SSP5, 2020, 2100, "SSP5 \nRCP 1.9")
+)
+```
+
+#### Combined Uptake Plot
+```{r combinedUptakeLinetype, echo=FALSE, message=FALSE, warning=FALSE, fig.height=6}
+earth_origin_plot_total(tracking_data, "uptake")
+```
+
+
+#### Combined Rate PLot
+```{r combinedRateLinetype, echo=FALSE, message=FALSE, warning=FALSE, fig.height=6}
+earth_origin_plot_total(tracking_data, "rate")
+```
+
 ## Airborne Fraction 
 First I created  a function to calcualte airborne fraction over a period of 
 specified time
@@ -2279,7 +2434,7 @@ meanAF <- mean(AF_values)
 
 Then I created a simple bar chart comparing to the Knorr 2009 values 
 ```{r airborne graph}
-names <- c("KNORR 1","KNORR 2","KNORR 3","KNORR 4","KNORR 5","KNORR 6","KNORR 7","HECTOR")
+names <- c("KNORR 1","KNORR 2","KNORR 3","KNORR 4","KNORR 5","KNORR 6","KNORR 7","HECTOR 2.6")
 values <- c(0.45, 0.453, 0.518, 0.468, 0.468, 0.514, 0.449, meanAF)
 error <- c(0.022, 0.014, 0.064, 0.047, 0.051, 0.035, 0.014, 0)
 df <- data.frame(names, values, error)

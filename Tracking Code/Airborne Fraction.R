@@ -63,7 +63,7 @@ for(val in 1800:1950){
 
 meanAF <- mean(AF_values)
 
-names <- c("KNORR 1","KNORR 2","KNORR 3","KNORR 4","KNORR 5","KNORR 6","KNORR 7","HECTOR")
+names <- c("KNORR 1","KNORR 2","KNORR 3","KNORR 4","KNORR 5","KNORR 6","KNORR 7","HECTOR 2.6")
 values <- c(0.45, 0.453, 0.518, 0.468, 0.468, 0.514, 0.449, meanAF)
 error <- c(0.022, 0.014, 0.064, 0.047, 0.051, 0.035, 0.014, 0)
 df <- data.frame(names, values, error)
@@ -77,3 +77,4 @@ graph <- ggplot(df) +
   xlab(NULL)
 
 graph
+
