@@ -93,7 +93,7 @@ earth_plot_maker <- function(results, start, type, subtitleName, facet) {
       )
   } else {
     areaGraph <- areaGraph +
-      ggtitle(paste("Earth Pool: Net Change from", start)) +
+      ggtitle(paste("Fraction of Uptake")) +
       facet_wrap(~scenario)
   }
   
@@ -106,21 +106,28 @@ ffi_results <- function(ini_file, start, stop, scenario) {
   core <- newcore(ini_file)
   run(core)
   
-  ffi_emissions <- fetchvars(core, 2020:2100, FFI_EMISSIONS())
-  ffi_emissions$value <- cumsum(ffi_emissions$value)
+  daccs <- fetchvars(core, 2020:2100, DACCS_UPTAKE())
+  daccs$value <- cumsum(daccs$value)
   
-  ffi_emissions %>%
+  daccs %>%
     select(value, year) %>%
-    rename("fossil_fuels" = value) ->
-    ffi_emissions
+    rename("daccs_uptake" = value) ->
+    daccs
   
   results %>%
-    right_join(ffi_emissions) %>%
+    group_by(year, scenario) %>%
+    mutate(sum = sum(source_amount)) ->
+    results
+  
+  results %>%
+    right_join(daccs)%>%
     select(-pool_value, -source_fraction) %>%
-    pivot_wider(names_from = "source_name", values_from = "source_amount") %>%
-    mutate(earth_c = earth_c + fossil_fuels) %>%
-    mutate(fossil_fuels = fossil_fuels * -1) %>%
-    pivot_longer(5:14, names_to = "source_name", values_to = "source_amount") ->
+    pivot_wider(names_from = "source_name", values_from = "source_amount")%>%
+    mutate(fossil_fuels = earth_c)%>%
+    mutate(earth_c = daccs_uptake - sum + earth_c)%>%
+    mutate(fossil_fuels = fossil_fuels - earth_c)%>%
+    select(-sum, -daccs_uptake)%>%
+    pivot_longer(5:14, names_to = "source_name", values_to = "source_amount")->
     results
 }
 
@@ -219,6 +226,6 @@ amountBar <- ggplot(barResults)+
   )+
   guides(fill = guide_legend(title = "Carbon Pools")) +
   ylab("Source Fraction") +
-  ggtitle(paste("Earth Pool: Net Change from 2020")) +
+  ggtitle(paste("Earth Pool: Fraction of Uptake")) +
   xlab("Scenario")
 amountBar

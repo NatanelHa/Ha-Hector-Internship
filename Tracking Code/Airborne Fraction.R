@@ -69,9 +69,12 @@ error <- c(0.022, 0.014, 0.064, 0.047, 0.051, 0.035, 0.014, 0)
 df <- data.frame(names, values, error)
 
 graph <- ggplot(df) +
-  aes(x=names, y=values) + 
+  aes(x=names, y=values, fill=names) + 
   geom_bar(stat="identity") +
   geom_errorbar(aes(ymin=values-error, ymax=values+error), width=.2)+
+  scale_fill_manual(values=c("#B92E34", "grey50", "grey50", "grey50", "grey50",
+                             "grey50", "grey50", "grey50")) +
+  theme(legend.position = "none")
   ggtitle("Airborne Fraction Comparison")+
   ylab("Airborne Fraction in 2020")+
   xlab(NULL)

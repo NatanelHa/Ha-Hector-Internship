@@ -2393,7 +2393,7 @@ Then I created a simple bar chart comparing to the Knorr 2009 values
 ```{r airborne graph}
 names <- c("KNORR 1","KNORR 2","KNORR 3","KNORR 4","KNORR 5","KNORR 6","KNORR 7","HECTOR 2.6")
 values <- c(0.45, 0.453, 0.518, 0.468, 0.468, 0.514, 0.449, meanAF)
-error <- c(0.022, 0.014, 0.064, 0.047, 0.051, 0.035, 0.014, 0)
+error <- c(0.022, 0.014, 0.064, 0.047, 0.051, 0.035, 0.014, NULL)
 df <- data.frame(names, values, error)
 
 graph <- ggplot(df) +

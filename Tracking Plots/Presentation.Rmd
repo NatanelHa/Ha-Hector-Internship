@@ -1,0 +1,765 @@
+---
+title: "Presentation Figures"
+author: "Natanel Ha"
+date: "8/16/2021"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_depth: 2
+    toc_float: 
+     collapsed: false
+     smooth_scroll: true
+    theme: paper
+---
+
+This document was created specifically just to generate the plots needed for 
+a presentation of work done by Natanel Ha, in his summer internship with Hector.
+More for Personal Use. 
+
+```{r importing, message=FALSE, warning=FALSE}
+library(hector)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+```{r inifiles, message=FALSE, warning=FALSE}
+path <- "/Users/Natanel Ha/Documents/GitHub/Ha-Hector-Internship/New Scenarios/"
+ini_file_26_SSP1 <- paste(path, "jay_SSP1.ini", sep = "")
+ini_file_19_SSP1 <- paste(path, "jay_19_SSP1.ini", sep = "")
+ini_file_26_SSP5 <- paste(path, "jay_SSP5.ini", sep = "")
+ini_file_19_SSP5 <- paste(path, "jay_19_SSP5.ini", sep = "")
+
+theme_set(theme_minimal())
+```
+
+```{r basicTrackingFunction}
+tracking_results <- function(ini_file, start, stop, scenarioName) {
+  # establish core
+  core <- newcore(ini_file)
+
+  # run core
+  run(core)
+
+  # Get Results
+  results_with_diff <- get_tracking_data(core)
+  results_with_diff
+
+  # Filter out diff and year
+  td <-
+    results_with_diff %>%
+    filter(pool_name != "Diff") %>%
+    filter(year <= stop) %>%
+    filter(year >= start) %>%
+    mutate(source_amount = source_fraction * pool_value) %>%
+    mutate(scenario = scenarioName)
+
+  return(td)
+}
+```
+
+```{r basicTrackingPlot}
+basic_plot <- function(td, graph_type, pool, title){
+  # Changing Order
+  td$pool_namef <- factor(td$pool_name, levels = c(
+    "detritus_c_global",
+    "veg_c_global",
+    "soil_c_global",
+    "earth_c",
+    "atmos_c",
+    "HL",
+    "intermediate",
+    "LL",
+    "deep"
+  ))
+  
+  # Set Theme
+  theme_set(theme_minimal())
+  
+  # Filter for Pool
+  if (pool != "all") {
+    td %>%
+      filter(pool_name == pool) ->
+      td
+  }
+  
+  ylabel <- "" 
+  
+  # Graph of Fractional Portion
+  if (graph_type == "fraction") {
+    td %>%
+      rename(yval = source_fraction) ->
+      td
+    ylabel <- "Source Fraction"
+  }
+  else {
+    td %>%
+      rename(yval = source_amount) ->
+      td
+    ylabel <- "Source Amount (Pg C)"
+  }
+    areaGraph <- ggplot(td) +
+      aes(x = year, y = yval, fill = source_name) +
+      geom_area() +
+      facet_wrap(~pool_namef, scales = "free_y",
+                 labeller = labeller(pool_namef = c(
+                   "detritus_c_global" = "Detritus",
+                   "veg_c_global" = "Vegetation",
+                   "soil_c_global" = "Soil",
+                   "earth_c" = "Earth",
+                   "atmos_c" = "Atmosphere",
+                   "HL" = "High Level Ocean",
+                   "intermediate" = "Intermediate Ocean",
+                   "LL" = "Low Level Ocean",
+                   "deep" = "Deep Ocean"
+                 ))
+      ) +
+      scale_fill_manual(
+        limits = c(
+          "detritus_c_global",
+          "veg_c_global",
+          "soil_c_global",
+          "earth_c",
+          "atmos_c",
+          "HL",
+          "intermediate",
+          "LL",
+          "deep"
+        ),
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth",
+          "Atmosphere",
+          "High Level Ocean",
+          "Intermediate Ocean",
+          "Low Level Ocean",
+          "Deep Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#DDDDDD",
+          "#882255",
+          "#AA4499",
+          "#88CCEE",
+          "#332288"
+        )
+      ) +
+      guides(fill = guide_legend(title = "Carbon Pools")) +
+      ylab(ylabel) +
+      ggtitle(title) +
+      xlab("Year")
+  return(areaGraph)
+}
+```
+
+## Fig 1. Basic Plot
+```{r fig1}
+td <- tracking_results(ini_file_19_SSP5, 1920, 2100, "RCP 1.9 SSP5")
+td %>%
+  filter(pool_name=="earth_c"|
+         pool_name=="soil_c_global"|
+         pool_name=="atmos_c"|
+         pool_name=="HL")->
+  td
+
+graph <- basic_plot(td, "amount", "all", "RCP 1.9 SSP5")
+graph
+```
+```{r functionResults}
+getResults <- function(ini_file, scenarioName){
+  core <- newcore(ini_file)
+  
+  run(core)
+  
+  result_vars <- c(FFI_EMISSIONS(), DACCS_UPTAKE(),ATMOSPHERIC_CO2(), GLOBAL_TEMP())
+  
+  results <- fetchvars(core, 2020:2100, result_vars, scenario = scenarioName)
+  
+  return(results)
+}
+```
+
+```{r rbindResults}
+hectorResults <- rbind(
+  getResults(ini_file_26_SSP1, "RCP 2.6 SSP1"),
+  getResults(ini_file_26_SSP5, "RCP 2.6 SSP5"),
+  getResults(ini_file_19_SSP1, "RCP 1.9 SSP1"),
+  getResults(ini_file_19_SSP5, "RCP 1.9 SSP5")
+)
+```
+
+## Fig 2. Scenarios Intro
+```{r hectorGraph}
+scenarioGraph <- ggplot(hectorResults)+
+  aes(x = year, y = value, color = scenario) +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y", 
+             labeller = labeller(variable = c("ffi_emissions" = "Fossil Fuel Emissions",
+                                              "daccs_uptake" = "DACCS Uptake",
+                                              "Ca" = "CO2 Concentration (ppmv CO2)",
+                                              "Tgav" = "Global Mean Temperature (degrees C)")))+
+  ylab(NULL)+
+  guides(color = guide_legend(title = "Scenario"))+
+  #scale_color_viridis_d()+
+  xlab("Year")
+scenarioGraph
+```
+
+```{r earthFunc}
+earth_calc <- function(ini_file, start, stop, scenario) {
+  results <- tracking_results(ini_file, start, stop, scenario) %>%
+    filter(pool_name == "earth_c")
+
+  # Finding earth_c values in start
+  # The year negative emissions starts
+  earth_start <-
+    results %>%
+    filter(source_name == "earth_c")
+
+  earth_start_carbon <-
+    first(earth_start$source_amount)
+
+  earth_start_fraction <-
+    first(earth_start$source_fraction)
+
+  # Calculating difference from start
+  results %>%
+    mutate(source_amount = source_amount - earth_start_carbon * (source_name == "earth_c")) %>%
+    mutate(source_fraction = source_fraction - earth_start_fraction * 
+             (source_name =="earth_c")) ->
+  results
+  return(results)
+}
+
+```
+
+```{r ffiResults}
+ffi_results <- function(ini_file, start, stop, scenario) {
+  results <- earth_calc(ini_file, start, stop, scenario)
+  
+  core <- newcore(ini_file)
+  run(core)
+  
+  daccs <- fetchvars(core, 2020:2100, DACCS_UPTAKE())
+  daccs$value <- cumsum(daccs$value)
+
+  daccs %>%
+    select(value, year) %>%
+    rename("daccs_uptake" = value) ->
+  daccs
+   
+  results %>%
+    group_by(year, scenario) %>%
+    mutate(sum = sum(source_amount)) ->
+  results
+  
+  results %>%
+    right_join(daccs)%>%
+    select(-pool_value, -source_fraction) %>%
+    pivot_wider(names_from = "source_name", values_from = "source_amount")%>%
+    mutate(fossil_fuels = earth_c)%>%
+    mutate(earth_c = daccs_uptake - sum + earth_c)%>%
+    mutate(fossil_fuels = fossil_fuels - earth_c)%>%
+    select(-sum, -daccs_uptake)%>%
+    pivot_longer(5:14, names_to = "source_name", values_to = "source_amount")->
+  results
+}
+```
+
+```{r ffiCombined}
+split_earth <- function(ini_file, start, stop, scenario) {
+  results <- ffi_results(ini_file, start, stop, scenario)
+  results <- combineOcean(results)
+  plot <- earth_plot_maker(results, start, "amount", scenario, FALSE)
+  return(plot)
+}
+```
+
+```{r earth_plot_maker}
+earth_plot_maker <- function(results, start, type, subtitleName, facet) {
+  ylabel <- ""
+  
+  if (type == "fraction") {
+    results %>%
+      rename(yval = source_fraction) ->
+      results
+    ylabel <- "Source Fraction"
+  } else {
+    results %>%
+      rename(yval = source_amount) ->
+      results
+    ylabel <- "Source Amount (Pg C)"
+  }
+  
+  # Plotting in area graph of amount
+  areaGraph <- ggplot(results) +
+    aes(x = year, y = yval, fill = source_name) +
+    geom_area() +
+    scale_fill_manual(
+        limits = c(
+          "detritus_c_global",
+          "veg_c_global",
+          "soil_c_global",
+          "earth_c",
+          "fossil_fuels",
+          "atmos_c",
+          "ocean"
+        ),
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth In",
+          "Earth Out",
+          "Atmosphere",
+          "Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#0d2612",
+          "#DDDDDD",
+          "#332288"
+        )
+    ) +
+    guides(fill = guide_legend(title = "Carbon Pools")) +
+    ylab(ylabel) +
+    xlab("Year")
+  
+  if (facet == FALSE) {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Earth Pool: Net Change from", start),
+              subtitle = subtitleName
+      )
+  } else {
+    areaGraph <- areaGraph +
+      ggtitle(paste("Earth Pool: Net Change from", start)) +
+      facet_wrap(~scenario)
+  }
+  
+  return(areaGraph)
+}
+```
+
+```{r combineOceans}
+combineOcean <- function(td){
+  td %>%
+    pivot_wider(names_from = "source_name", values_from = "source_amount")%>%
+    mutate(ocean = deep+HL+intermediate+LL)%>%
+    select(-deep, -HL, -LL, -intermediate)%>%
+    pivot_longer(5:11,names_to="source_name", values_to="source_amount")->
+  td
+  
+  return(td)
+}
+```
+
+## Fig 3. Earth Plot
+```{r earth_split19s5, echo=FALSE, message=FALSE, warning=FALSE}
+split_earth(ini_file_19_SSP5, 2020, 2100, "RCP 1.9 SSP5")
+```
+
+```{r rbindFFI, message=FALSE, warning=FALSE}
+total_results_split <-
+  rbind(
+    ffi_results(ini_file_26_SSP1, 2020, 2100, "SSP1 \nRCP 2.6"),
+    ffi_results(ini_file_26_SSP5, 2020, 2100, "SSP5 \nRCP 2.6"),
+    ffi_results(ini_file_19_SSP1, 2020, 2100, "SSP1 \nRCP 1.9"),
+    ffi_results(ini_file_19_SSP5, 2020, 2100, "SSP5 \nRCP 1.9 ")
+  )
+total_results_split <- combineOcean(total_results_split)
+```
+
+```{r filterEarthYears}
+total_results_split %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+barData
+```
+
+## Fig 4. Bar Graph Scenario
+```{r earthStackedBar, fig.width=9}
+barGraph <- ggplot(barData) +
+  aes(x = scenario, y = source_amount, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+        limits = c(
+          "detritus_c_global",
+          "veg_c_global",
+          "soil_c_global",
+          "earth_c",
+          "fossil_fuels",
+          "atmos_c",
+          "ocean"
+        ),
+        labels = c(
+          "Detritus",
+          "Vegetation",
+          "Soil",
+          "Earth In",
+          "Earth Out",
+          "Atmosphere",
+          "Ocean"
+        ),
+        values = c(
+          "#DDCC77",
+          "#999933",
+          "#44AA99",
+          "#117733",
+          "#0d2612",
+          "#DDDDDD",
+          "#332288"
+        )
+  ) +
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Amount (Pg C)") +
+  ggtitle(paste("Earth Pool: Net Change from 2020")) +
+  xlab("Scenario")
+barGraph
+```
+
+```{r finding fraction}
+total_results_split %>%
+    group_by(pool_name, source_name) %>%
+    mutate(differ = source_amount - lag(source_amount)) ->
+total_results_split
+
+total_results_split %>%
+  filter(source_name!="fossil_fuels")%>%
+  group_by(year, scenario)%>%
+  mutate(sum = sum(differ))->
+  uptake_fraction 
+
+uptake_fraction %>%
+  mutate(source_fraction = differ/sum)->
+  uptake_fraction
+```
+
+```{r earthUptakeBarFrac, fig.width=9}
+uptake_fraction %>%
+  filter(year > 2030) %>%
+  filter(year %% 25 == 0) ->
+  barResults
+
+amountBar <- ggplot(barResults)+
+  aes(x = scenario, y = source_fraction, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c",
+      "ocean"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere",
+      "Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#332288"
+    )
+  )+
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Fraction") +
+  ggtitle(paste("Earth Pool: Fraction of Uptake")) +
+  xlab("Scenario")
+```
+
+```{r getatmosresults, fig.width=9}
+tracking_results_total <- rbind(
+    tracking_results(ini_file_26_SSP1, 2020, 2100, "SSP1 \nRCP 2.6"),
+    tracking_results(ini_file_26_SSP5, 2020, 2100, "SSP5 \nRCP 2.6"),
+    tracking_results(ini_file_19_SSP1, 2020, 2100, "SSP1 \nRCP 1.9"),
+    tracking_results(ini_file_19_SSP5, 2020, 2100, "SSP5 \nRCP 1.9 ")
+)
+
+atmos_results <- tracking_results_total %>%
+  filter(pool_name=="atmos_c")%>%
+  select(-source_amount, -pool_value)%>%
+  pivot_wider(names_from = "source_name", values_from = "source_fraction")%>%
+  mutate(ocean = deep+HL+intermediate+LL)%>%
+  select(-deep, -HL, -LL, -intermediate)%>%
+  pivot_longer(5:10,names_to="source_name", values_to="source_fraction")->
+  atmos_results_all
+atmos_results_bar <- atmos_results_all%>%
+  filter(year>2030)%>%
+  filter(year %% 25 ==0)
+
+atmosBar <- ggplot(atmos_results)+
+  aes(x = scenario, y = source_fraction, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~year) +
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c",
+      "ocean"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere",
+      "Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#332288"
+    )
+  )+
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Fraction") +
+  ggtitle(paste("Atmos Pool: Fraction of Pool")) +
+  xlab("Scenario")
+```
+
+## Fig 5. Fraction Plots
+```{r combinedFracionPLot, fig.width=9, fig.height=7}
+atmos_results_all <-
+  atmos_results_all %>%
+  mutate(year=year+1)
+
+combinedBar <- rbind(
+  barResults,
+  atmos_results_all
+)
+
+combinedBar %>%
+  filter(year==2100)->
+  combinedBar
+
+
+finalBar <- ggplot(combinedBar)+
+  aes(x = pool_name, y = source_fraction, fill = source_name) +
+  geom_bar(stat = "identity") +
+  facet_grid(~scenario)+
+  scale_fill_manual(
+    limits = c(
+      "detritus_c_global",
+      "veg_c_global",
+      "soil_c_global",
+      "earth_c",
+      "atmos_c",
+      "ocean"
+    ),
+    labels = c(
+      "Detritus",
+      "Vegetation",
+      "Soil",
+      "Earth",
+      "Atmosphere",
+      "Ocean"
+    ),
+    values = c(
+      "#DDCC77",
+      "#999933",
+      "#44AA99",
+      "#117733",
+      "#DDDDDD",
+      "#332288"
+    )
+  )+
+  scale_x_discrete(labels = c("Atmosphere\nComposition","Earth\nUptake"))+
+  guides(fill = guide_legend(title = "Carbon Pools")) +
+  ylab("Source Fraction") +
+  ggtitle(paste("Earth Uptake and Atmsophere Composition in 2100")) +
+  xlab("Scenario")
+finalBar
+```
+
+```{r earthOrigin}
+earth_origin_plot <- function(ini_file, start, stop, type, scenarioName) {
+  # Filtering for earth origin c
+  td <- tracking_results(ini_file, 2020, 2100, scenarioName)
+
+  td %>%
+    filter(source_name == "earth_c") %>%
+    filter(pool_name == "soil_c_global" |
+      pool_name == "deep" |
+      pool_name == "HL" |
+      pool_name == "intermediate" |
+      pool_name == "LL") %>%
+    select(-source_fraction, -pool_value) %>%
+    pivot_wider(names_from = "pool_name", values_from = "source_amount") %>%
+    mutate(ocean = deep + HL + intermediate + LL) %>%
+    select(-deep, -HL, -intermediate, -LL) %>%
+    pivot_longer(5:6, names_to = "pool_name", values_to = "source_amount") ->
+  td
+
+  title <- ""
+  ytitle <- ""
+
+  if (type == "total") {
+    title <- "Total Carbon with Earth Pool Origin"
+    ytitle <- "Source Amount (Pg C)"
+
+    td <- td %>%
+      rename(yval = source_amount)
+  } else {
+    title <- "Total Uptake Carbon with Earth Pool Origin"
+    ytitle <- "Source Amount (Pg C)"
+
+    earthData <- ffi_results(ini_file, 2020, 2100, scenarioName)
+    earthData %>%
+      filter(source_name=="earth_c")%>%
+      select(source_amount, year)%>%
+      rename(earth_c = "source_amount")->
+    earthData
+    
+    td %>%
+      pivot_wider(names_from = "pool_name", values_from = "source_amount") %>%
+      right_join(earthData)%>%
+      mutate(ocean = ocean - first(ocean)) %>%
+      mutate(soil_c_global = soil_c_global - first(soil_c_global)) %>%
+      pivot_longer(5:7, names_to = "pool_name", values_to = "source_amount") ->
+    td
+
+    if (type == "rate") {
+      td %>%
+        group_by(pool_name, source_name) %>%
+        mutate(differ = source_amount - lag(source_amount)) %>%
+        filter(!is.na(differ)) ->
+      td
+
+      title <- "Rate of Uptake of Carbon with Earth Pool Origin"
+      ytitle <- "Source Amount (Pg C/Yr)"
+      td <- td %>%
+        rename(yval = differ)
+    } else {
+      td <- td %>%
+        rename(yval = source_amount)
+    }
+  }
+
+
+  graph <- ggplot(td) +
+    aes(x = year, y = yval, color = pool_name) +
+    geom_line(size = 1.25) +
+    scale_color_manual(
+      limits = c(
+        "earth_c",
+        "soil_c_global",
+        "ocean"
+      ),
+      labels = c(
+        "Earth",
+        "Soil",
+        "Ocean"
+      ),
+      values = c(
+        "#117733",
+        "#44AA99",
+        "#332288"
+      )
+    ) +
+    guides(color = guide_legend(title = "Carbon Pools")) +
+    ylab(ytitle) +
+    ggtitle(title,
+      subtitle = scenarioName
+    ) +
+    xlab("Year")
+  return(graph)
+}
+```
+
+## Fig 6. Earth Origin C Rate
+```{r fullOcean_earthRate_19s5, echo=FALSE, message=FALSE, warning=FALSE}
+earth_origin_plot(ini_file_19_SSP5, 2020, 2100, "rate", "RCP 1.9 SSP5")
+```
+
+```{r airborneFunc}
+AF_calc <- function(td, start, stop) {
+  
+  atm_c <- td %>%
+    filter(year == start | year == stop) %>%
+    filter(pool_name == "atmos_c") %>%
+    filter(source_name == "earth_c")
+
+
+  atm_c <- last(atm_c$source_amount) - first(atm_c$source_amount)
+
+  earth_c_loss <- td %>%
+    filter(year == start | year == stop) %>%
+    filter(pool_name == "earth_c") %>%
+    filter(source_name == "earth_c")
+
+  earth_c_loss <- first(earth_c_loss$source_amount) - last(earth_c_loss$source_amount)
+
+  AF <- atm_c / earth_c_loss
+  
+  return(AF)
+}
+```
+
+```{r airborneRange}
+rcp26 <- system.file("input", "hector_rcp26.ini", package = "hector")
+td <- tracking_results(rcp26, 1800, 2050, "RCP 2.6")
+
+AF_values <- c()
+for(val in 1800:1950){
+  AF_values <- append(AF_values, AF_calc(td, val, 2000))
+}
+
+meanAF <- mean(AF_values)
+```
+
+## Fig 7. Airborne Fraction
+```{r airborne graph}
+names <- c("KNORR 1","KNORR 2","KNORR 3","KNORR 4","KNORR 5","KNORR 6","KNORR 7","HECTOR 2.6")
+values <- c(0.45, 0.453, 0.518, 0.468, 0.468, 0.514, 0.449, meanAF)
+error <- c(0.022, 0.014, 0.064, 0.047, 0.051, 0.035, 0.014, 0)
+df <- data.frame(names, values, error)
+
+graph <- ggplot(df) +
+  aes(x=names, y=values, fill=names) + 
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=values-error, ymax=values+error), width=.2)+
+  scale_fill_manual(values=c("#B92E34", "grey50", "grey50", "grey50", "grey50",
+                             "grey50", "grey50", "grey50")) +
+  theme(legend.position = "none")+
+  ggtitle("Airborne Fraction Comparison")+
+  ylab("Airborne Fraction in 2000")+
+  xlab(NULL)
+
+graph
+```
+
+##### Session Info: 
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
+
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
+
+
+
+
