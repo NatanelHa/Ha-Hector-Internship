@@ -109,9 +109,9 @@ basic_plot <- function(td, graph_type, pool, title){
                    "soil_c_global" = "Soil",
                    "earth_c" = "Earth",
                    "atmos_c" = "Atmosphere",
-                   "HL" = "High Level Ocean",
+                   "HL" = "High Latitude Ocean Surface",
                    "intermediate" = "Intermediate Ocean",
-                   "LL" = "Low Level Ocean",
+                   "LL" = "Low Latitude Ocean Surface",
                    "deep" = "Deep Ocean"
                  ))
       ) +
@@ -123,8 +123,8 @@ basic_plot <- function(td, graph_type, pool, title){
           "earth_c",
           "atmos_c",
           "HL",
-          "intermediate",
           "LL",
+          "intermediate",
           "deep"
         ),
         labels = c(
@@ -133,9 +133,9 @@ basic_plot <- function(td, graph_type, pool, title){
           "Soil",
           "Earth",
           "Atmosphere",
-          "High Level Ocean",
+          "High Latitude Ocean Surface",
+          "Low Latitude Ocean Surface" ,
           "Intermediate Ocean",
-          "Low Level Ocean",
           "Deep Ocean"
         ),
         values = c(
@@ -177,7 +177,7 @@ getResults <- function(ini_file, scenarioName){
   
   run(core)
   
-  result_vars <- c(FFI_EMISSIONS(), DACCS_UPTAKE(),ATMOSPHERIC_CO2(), GLOBAL_TEMP())
+  result_vars <- c(DACCS_UPTAKE(), FFI_EMISSIONS())
   
   results <- fetchvars(core, 2020:2100, result_vars, scenario = scenarioName)
   
@@ -196,15 +196,18 @@ hectorResults <- rbind(
 
 ## Fig 2. Scenarios Intro
 ```{r hectorGraph}
+hectorResults$variablef <- factor(hectorResults$variable, levels = c(
+    "ffi_emissions",
+    "daccs_uptake"
+  ))
+
 scenarioGraph <- ggplot(hectorResults)+
   aes(x = year, y = value, color = scenario) +
-  geom_line() +
-  facet_wrap(~variable, scales = "free_y", 
-             labeller = labeller(variable = c("ffi_emissions" = "Fossil Fuel Emissions",
-                                              "daccs_uptake" = "DACCS Uptake",
-                                              "Ca" = "CO2 Concentration (ppmv CO2)",
-                                              "Tgav" = "Global Mean Temperature (degrees C)")))+
-  ylab(NULL)+
+  geom_line(size = 1) +
+  facet_wrap(~variablef, 
+             labeller = labeller(variablef = c("ffi_emissions" = "Fossil Fuel Emissions",
+                                              "daccs_uptake" = "DACCS Uptake")))+
+  ylab("PG C/Yr")+
   guides(color = guide_legend(title = "Scenario"))+
   #scale_color_viridis_d()+
   xlab("Year")
@@ -543,7 +546,7 @@ atmosBar <- ggplot(atmos_results)+
 ```
 
 ## Fig 5. Fraction Plots
-```{r combinedFracionPLot, fig.width=9, fig.height=7}
+```{r combinedFracionPLot, fig.width=8, fig.height=6}
 atmos_results_all <-
   atmos_results_all %>%
   mutate(year=year+1)
@@ -588,7 +591,7 @@ finalBar <- ggplot(combinedBar)+
       "#332288"
     )
   )+
-  scale_x_discrete(labels = c("Atmosphere\nComposition","Earth\nUptake"))+
+  scale_x_discrete(labels = c("Atmosphere\nComposition","DACCS \nUptake"))+
   guides(fill = guide_legend(title = "Carbon Pools")) +
   ylab("Source Fraction") +
   ggtitle(paste("Earth Uptake and Atmsophere Composition in 2100")) +
