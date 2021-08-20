@@ -725,20 +725,15 @@ AF_calc <- function(td, start, stop) {
 
 ```{r airborneRange}
 rcp26 <- system.file("input", "hector_rcp26.ini", package = "hector")
-td <- tracking_results(rcp26, 1800, 2050, "RCP 2.6")
+td <- tracking_results(rcp26, 1750, 2050, "RCP 2.6")
 
-AF_values <- c()
-for(val in 1800:1950){
-  AF_values <- append(AF_values, AF_calc(td, val, 2000))
-}
-
-meanAF <- mean(AF_values)
+AF_2000 <- AF_calc(td, 1750, 2000)
 ```
 
 ## Fig 7. Airborne Fraction
 ```{r airborne graph}
 names <- c("KNORR 1","KNORR 2","KNORR 3","KNORR 4","KNORR 5","KNORR 6","KNORR 7","HECTOR 2.6")
-values <- c(0.45, 0.453, 0.518, 0.468, 0.468, 0.514, 0.449, meanAF)
+values <- c(0.45, 0.453, 0.518, 0.468, 0.468, 0.514, 0.449, AF_2000)
 error <- c(0.022, 0.014, 0.064, 0.047, 0.051, 0.035, 0.014, 0)
 df <- data.frame(names, values, error)
 
@@ -750,7 +745,7 @@ graph <- ggplot(df) +
                              "grey50", "grey50", "grey50")) +
   theme(legend.position = "none")+
   ggtitle("Airborne Fraction Comparison")+
-  ylab("Airborne Fraction in 2000")+
+  ylab("Airborne Fraction in 2020")+
   xlab(NULL)
 
 graph
